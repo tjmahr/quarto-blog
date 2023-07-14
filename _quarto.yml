@@ -1,0 +1,20 @@
+project:
+  type: website
+
+website:
+  repo-url: "https://github.com/tjmahr/tjmahr.github.io/"
+  title: "quarto-blog-test"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/
+      - icon: twitter
+        href: https://twitter.com
+format:
+  html:
+    theme: sandstone
+    css: styles.css
+
+
+
