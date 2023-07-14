@@ -1,5 +1,5 @@
 ---
-title: "Higher order functions"
+title: "TJ Mahr's blog"
 listing:
   contents: posts
   sort: "date desc"
@@ -9,7 +9,19 @@ listing:
   filter-ui: false
   fields: [image, date, title, subtitle, description]
 page-layout: full
-title-block-banner: true
+title-block-banner: false
 ---
 
+::: {.callout-caution}
+## Builder Teej is yelling something at us! 👷
+
+Whoa whoa, you see the barricades here? 🚧🚧🚧  
+
+This place is under construction! This is just a temporary sandbox while I
+(figure out how to) migrate to a quarto blog! 
+
+And besides I can't let you in without a hard hat on.
+
+
+:::
 

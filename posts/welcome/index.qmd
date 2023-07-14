@@ -1,5 +1,6 @@
 ---
 title: "playing with quatro"
+description: "this is STILL in beta"
 date: "2023-07-02"
 categories: [meta, dev]
 ---
