@@ -1,0 +1,20 @@
+```{r}
+#| include: false
+.session_info <- sessioninfo::session_info()
+if (isNamespaceLoaded("rstan") || isNamespaceLoaded("rstanarm")) {
+  .session_info$platform$`stan (rstan)` <- rstan::stan_version()
+}
+if (isNamespaceLoaded("cmdstanr")) {
+  .session_info$platform$`stan (cmdstanr)` <- cmdstanr::cmdstan_version()
+}
+```
+
+
+***
+
+Session info:
+
+```{r}
+#| results: "markup"
+.session_info
+```

@@ -9,6 +9,10 @@ title-block-banner: true
 
 author: "TJ Mahr"
 
+code-link: true
+code-tools:
+  source: repo
+
 knitr:
   opts_chunk:
     collapse: true

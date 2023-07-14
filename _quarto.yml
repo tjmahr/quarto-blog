@@ -1,9 +1,10 @@
 project:
   type: website
+  output-dir: docs
 
 website:
-  repo-url: "https://github.com/tjmahr/tjmahr.github.io/"
-  title: "quarto-blog-test"
+  repo-url: "https://github.com/tjmahr/quarto-blog"
+  title: "Higher Order Functions"
   navbar:
     right:
       - about.qmd
