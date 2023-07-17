@@ -50,7 +50,6 @@ image: "image.jpg"
 So to migrate a post, I need to map:
 
 - path `[date]-[slug-name].Rmd` -> path `posts/[slug-name]/index.qmd`
-- yaml `title` -> yaml `title`
 - yaml `excerpt` -> yaml `description`
 - yaml `tags` -> yaml `categories`
 - date in slug -> yaml `date`

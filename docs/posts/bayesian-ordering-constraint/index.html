@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="TJ Mahr">
+<meta name="dcterms.date" content="2023-07-03">
+<meta name="description" content="But mostly how contrast matrices are computed">
+<title>Higher Order Functions - Ordering constraints in brms using contrast coding</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script><style>
+
+      .quarto-title-block .quarto-title-banner {
+        background-image: url(2023-07-ruins-1280.jpg);
+background-size: cover;
+      }
+</style>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><link rel="stylesheet" href="../../styles.css">
+</head>
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Higher Order Functions</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+<div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Ordering constraints in brms using contrast coding</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/tjmahr/quarto-blog/blob/main/posts/bayesian-ordering-constraint/index.qmd"><i class="bi"></i> Code</button></div></div>
+                  <div>
+        <div class="description">
+          But mostly how contrast matrices are computed
+        </div>
+      </div>
+                </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>TJ Mahr </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 3, 2023</p>
+      </div>
+    </div>
+    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">July 17, 2023</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content"><p>Mattan S. Ben-Shachar wrote an <a href="https://blog.msbstats.info/posts/2023-06-26-order-constraints-in-brms/" title="Order Constraints in Bayes Models (with brms)">excellent tutorial</a> about how to impose ordering constraints in Bayesian regression models. In that post, the data comes from archaeology (inspired by <a href="https://arxiv.org/abs/1704.07141">Buck, 2017</a> but not an exact copy). We have samples from different layers (<code>Layer</code>) in a site, and for each sample, we have a <code>C14</code> radiocarbon date measurement and its associated measurement <code>error</code>.</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">table1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html">tribble</a></span><span class="op">(</span></span>
+<span>  <span class="op">~</span><span class="va">Layer</span>,  <span class="op">~</span><span class="va">C14</span>, <span class="op">~</span><span class="va">error</span>,</span>
+<span>     <span class="st">"B"</span>, <span class="op">-</span><span class="fl">5773</span>,     <span class="fl">30</span>,</span>
+<span>     <span class="st">"B"</span>, <span class="op">-</span><span class="fl">5654</span>,     <span class="fl">30</span>,</span>
+<span>     <span class="st">"B"</span>, <span class="op">-</span><span class="fl">5585</span>,     <span class="fl">30</span>,</span>
+<span>     <span class="st">"C"</span>, <span class="op">-</span><span class="fl">5861</span>,     <span class="fl">30</span>,</span>
+<span>     <span class="st">"C"</span>, <span class="op">-</span><span class="fl">5755</span>,     <span class="fl">30</span>,</span>
+<span>     <span class="st">"E"</span>, <span class="op">-</span><span class="fl">5850</span>,     <span class="fl">50</span>,</span>
+<span>     <span class="st">"E"</span>, <span class="op">-</span><span class="fl">5928</span>,     <span class="fl">50</span>,</span>
+<span>     <span class="st">"E"</span>, <span class="op">-</span><span class="fl">5905</span>,     <span class="fl">50</span>,</span>
+<span>     <span class="st">"G"</span>, <span class="op">-</span><span class="fl">6034</span>,     <span class="fl">30</span>,</span>
+<span>     <span class="st">"G"</span>, <span class="op">-</span><span class="fl">6184</span>,     <span class="fl">30</span>,</span>
+<span>     <span class="st">"I"</span>, <span class="op">-</span><span class="fl">6248</span>,     <span class="fl">50</span>,</span>
+<span>     <span class="st">"I"</span>, <span class="op">-</span><span class="fl">6350</span>,     <span class="fl">50</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="va">table1</span><span class="op">$</span><span class="va">Layer</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">table1</span><span class="op">$</span><span class="va">Layer</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Because of how the layers are ordered—new stuff piled on top of older stuff—we <em>a priori</em> expect deeper layers to have older dates, so these are the ordering constraints:</p>
+<p><span class="math display">\[
+\mu_{\text{Layer I}} &lt; \mu_{\text{Layer G}} &lt; \mu_{\text{Layer E}} &lt; \mu_{\text{Layer C}} &lt; \mu_{\text{Layer B}}
+\]</span></p>
+<p>where <em>μ</em> is the average <code>C14</code> age of a layer.</p>
+<p>Ben-Shachar’s post works through some ways in brms to achieve this constraint:</p>
+<ol type="1">
+<li><p>Fit the usual model but filter out posterior draws where the ordering constraint is violated.</p></li>
+<li><p>Have the Stan sampler <code>reject</code> draws where the constraint is violated. But note that the <a href="https://mc-stan.org/docs/reference-manual/reject-statements.html" title="Stan Manual: Reject statements">documentation for <code>reject</code></a> has a section titled “Rejection is not for constraints”.</p></li>
+<li><p>Use brms’s monotonic effect <a href="https://paul-buerkner.github.io/brms/articles/brms_monotonic.html" title="Estimating Monotonic Effects with brms"><code>mo()</code></a> syntax.</p></li>
+</ol>
+<p>In this post, I am going to add another option to this list:</p>
+<ol start="4">
+<li>
+Use contrast coding so the model parameters represent the differences between successive levels, and use priors to enforce the ordering constraint.
+</li>
+</ol>
+<section id="big-idea-of-contrast-coding" class="level2"><h2 class="anchored" data-anchor-id="big-idea-of-contrast-coding">Big idea of contrast coding</h2>
+<p>When our model includes categorical variables, we need some way to code those variables in our model (that is, use numbers to represent the category levels). Our choice of coding scheme will change the meaning of the model parameters, allowing us to perform different comparisons (test different statistical hypotheses) about the means of the category levels. Let’s spell that out again, because it is the big idea of the contrast coding:</p>
+<pre><code>different contrast coding schemes &lt;-&gt; 
+  different parameter meanings &lt;-&gt; 
+    different comparisons / hypotheses</code></pre>
+<p>(Isn’t that an eye-popping graphic?)</p>
+<p>The toolbox of contrast coding schemes is deep but also confusing. Whenever I step away from R’s default contrast coding, I usually have these pages open to help me: <a href="https://stats.oarc.ucla.edu/spss/faq/coding-systems-for-categorical-variables-in-regression-analysis/" title="https://stats.oarc.ucla.edu/spss/faq/coding-systems-for-categorical-variables-in-regression-analysis/">some tutorial on a UCLA page</a>, Lisa DeBruine’s <a href="https://debruine.github.io/faux/articles/contrasts.html">comparison article</a>, and the menu of <a href="https://rdrr.io/pkg/emmeans/man/emmc-functions.html">contrast schemes in emmeans</a>. So, let’s review the basics by looking at R’s default contrast coding scheme.</p>
+</section><section id="the-default-dummy-coding" class="level2"><h2 class="anchored" data-anchor-id="the-default-dummy-coding">The default: dummy coding</h2>
+<p>By default, R will code categorical variables in a regression model using “treatment” or “dummy” coding. In this scheme,</p>
+<ul>
+<li>The intercept is the mean of one of the category levels (the <em>reference level</em>)</li>
+<li>Parameters estimate the difference between each other level and the reference level</li>
+</ul>
+<p>Let’s fit a simple linear model and work through the parameter meanings:</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">Layer</span>, <span class="va">table1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; (Intercept)      LayerC      LayerE      LayerG      LayerI </span></span>
+<span><span class="co">#&gt;  -5670.6667   -137.3333   -223.6667   -438.3333   -628.3333</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here, the <code>(Intercept)</code> is the mean of the reference level, and the reference level is the level of the categorical variable not listed in the other parameter names (<code>LayerB</code>). Each of the other parameters is a difference from that reference level. Layer C’s mean is <code>(Intercept)</code> + <code>LayerC</code>. The <a href="https://rdrr.io/r/stats/model.matrix.html"><code>model.matrix()</code></a> shows how these categorical variables are coded in the model’s design/contrast matrix:</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Matrix has 1 row per observation but we just want 1 per category level</span></span>
+<span><span class="va">mat_m1</span> <span class="op">&lt;-</span> <span class="va">m1</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">mat_m1</span></span>
+<span><span class="co">#&gt;    (Intercept) LayerC LayerE LayerG LayerI</span></span>
+<span><span class="co">#&gt; 1            1      0      0      0      0</span></span>
+<span><span class="co">#&gt; 4            1      1      0      0      0</span></span>
+<span><span class="co">#&gt; 6            1      0      1      0      0</span></span>
+<span><span class="co">#&gt; 9            1      0      0      1      0</span></span>
+<span><span class="co">#&gt; 11           1      0      0      0      1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>(Intercept)</code> is the model constant, so naturally, it’s switched on (equals 1) for every row. Each of the other columns are <em>indicator variables</em>. <code>layerC</code> turns on for the layer C rows, <code>layerE</code> turns on for layer E rows, and so on.</p>
+<p>Matrix multiplying the contrast matrix by the model coefficients will compute the mean values of each layer.</p>
+<p><span class="math display">\[
+\mathbf{\hat y} = \mathbf{X}\boldsymbol{\beta}
+\]</span></p>
+<p>Think of this equation as a contract for a contrast coding scheme: Multiplying the contrast matrix by the model coefficients should give us the means of the category levels.</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat_m1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         [,1]</span></span>
+<span><span class="co">#&gt; 1  -5670.667</span></span>
+<span><span class="co">#&gt; 4  -5808.000</span></span>
+<span><span class="co">#&gt; 6  -5894.333</span></span>
+<span><span class="co">#&gt; 9  -6109.000</span></span>
+<span><span class="co">#&gt; 11 -6299.000</span></span>
+<span></span>
+<span><span class="co"># Means by hand</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">~</span> <span class="va">Layer</span>, <span class="va">table1</span>, <span class="va">mean</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Layer       C14</span></span>
+<span><span class="co">#&gt; 1     B -5670.667</span></span>
+<span><span class="co">#&gt; 2     C -5808.000</span></span>
+<span><span class="co">#&gt; 3     E -5894.333</span></span>
+<span><span class="co">#&gt; 4     G -6109.000</span></span>
+<span><span class="co">#&gt; 5     I -6299.000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If the matrix multiplication is too quick, here it is in slow motion where each row has been weighted (multiplied) by coefficients:</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Sums of the rows are the means</span></span>
+<span><span class="va">mat_m1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         [,1]      [,2]      [,3]      [,4]      [,5]</span></span>
+<span><span class="co">#&gt; 1  -5670.667    0.0000    0.0000    0.0000    0.0000</span></span>
+<span><span class="co">#&gt; 4  -5670.667 -137.3333    0.0000    0.0000    0.0000</span></span>
+<span><span class="co">#&gt; 6  -5670.667    0.0000 -223.6667    0.0000    0.0000</span></span>
+<span><span class="co">#&gt; 9  -5670.667    0.0000    0.0000 -438.3333    0.0000</span></span>
+<span><span class="co">#&gt; 11 -5670.667    0.0000    0.0000    0.0000 -628.3333</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="successive-differences-coding" class="level3"><h3 class="anchored" data-anchor-id="successive-differences-coding">Successive differences coding</h3>
+<p>Now, let’s look at a different kind of coding: (reverse) successive differences coding. In this scheme:</p>
+<ul>
+<li>The intercept is the mean of the levels means</li>
+<li>Parameters estimate the difference between adjacent levels</li>
+<li>but I have to reverse how the levels are ordered in the underlying <a href="https://rdrr.io/r/base/factor.html"><code>factor()</code></a> so that the differences are positive, comparing each layer with the one <em>below</em> it. (<code>LayerB - LayerC</code> should be positive).</li>
+</ul>
+<p>We apply this coding by creating a new factor and setting the <a href="https://rdrr.io/r/stats/contrasts.html"><code>contrast()</code></a>. R lets us set the contrast to the name of a function that computes contrasts, so we use <code>"contr.sdif"</code>.</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">contr.sdif</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MASS/man/contr.sdif.html">contr.sdif</a></span></span>
+<span></span>
+<span><span class="co"># Reverse the factor levels</span></span>
+<span><span class="va">table1</span><span class="op">$</span><span class="va">LayerAlt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">table1</span><span class="op">$</span><span class="va">Layer</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span><span class="op">(</span><span class="va">table1</span><span class="op">$</span><span class="va">Layer</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/contrasts.html">contrasts</a></span><span class="op">(</span><span class="va">table1</span><span class="op">$</span><span class="va">LayerAlt</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"contr.sdif"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then we just fit the model as usual. As intended, the model’s coefficients are different.</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">LayerAlt</span>, <span class="va">table1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; (Intercept) LayerAltG-I LayerAltE-G LayerAltC-E LayerAltB-C </span></span>
+<span><span class="co">#&gt; -5956.20000   190.00000   214.66667    86.33333   137.33333</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can compute the mean of layer means and the layer differences by hand to confirm that the model parameters are computing what we expect.</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Make a list so we can write out the diffs easily</span></span>
+<span><span class="va">layer_means</span> <span class="op">&lt;-</span> <span class="va">table1</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Layer</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">C14</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">layer_means</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 5</span></span>
+<span><span class="co">#&gt;  $ B: num -5671</span></span>
+<span><span class="co">#&gt;  $ C: num -5808</span></span>
+<span><span class="co">#&gt;  $ E: num -5894</span></span>
+<span><span class="co">#&gt;  $ G: num -6109</span></span>
+<span><span class="co">#&gt;  $ I: num -6299</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  model_coef <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span>,</span>
+<span>  by_hand <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">layer_means</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="va">layer_means</span><span class="op">$</span><span class="va">G</span> <span class="op">-</span> <span class="va">layer_means</span><span class="op">$</span><span class="va">I</span>,</span>
+<span>    <span class="va">layer_means</span><span class="op">$</span><span class="va">E</span> <span class="op">-</span> <span class="va">layer_means</span><span class="op">$</span><span class="va">G</span>,</span>
+<span>    <span class="va">layer_means</span><span class="op">$</span><span class="va">C</span> <span class="op">-</span> <span class="va">layer_means</span><span class="op">$</span><span class="va">E</span>,</span>
+<span>    <span class="va">layer_means</span><span class="op">$</span><span class="va">B</span> <span class="op">-</span> <span class="va">layer_means</span><span class="op">$</span><span class="va">C</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;              model_coef     by_hand</span></span>
+<span><span class="co">#&gt; (Intercept) -5956.20000 -5956.20000</span></span>
+<span><span class="co">#&gt; LayerAltG-I   190.00000   190.00000</span></span>
+<span><span class="co">#&gt; LayerAltE-G   214.66667   214.66667</span></span>
+<span><span class="co">#&gt; LayerAltC-E    86.33333    86.33333</span></span>
+<span><span class="co">#&gt; LayerAltB-C   137.33333   137.33333</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Back to our contrast coding contract, we see that the contrast matrix matrix-multiplied by the model coefficients gives us the level means.</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat_m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mat_m2</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         [,1]</span></span>
+<span><span class="co">#&gt; 1  -5670.667</span></span>
+<span><span class="co">#&gt; 4  -5808.000</span></span>
+<span><span class="co">#&gt; 6  -5894.333</span></span>
+<span><span class="co">#&gt; 9  -6109.000</span></span>
+<span><span class="co">#&gt; 11 -6299.000</span></span>
+<span></span>
+<span><span class="co"># By hand</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">~</span> <span class="va">Layer</span>, <span class="va">table1</span>, <span class="va">mean</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Layer       C14</span></span>
+<span><span class="co">#&gt; 1     B -5670.667</span></span>
+<span><span class="co">#&gt; 2     C -5808.000</span></span>
+<span><span class="co">#&gt; 3     E -5894.333</span></span>
+<span><span class="co">#&gt; 4     G -6109.000</span></span>
+<span><span class="co">#&gt; 5     I -6299.000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>It’s so clean and simple. We still get the level means and the parameters estimate specific comparisons of interest to us. So, how are the categorical variables and their differences coded in the model’s contrast matrix?</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat_m2</span></span>
+<span><span class="co">#&gt;    (Intercept) LayerAltG-I LayerAltE-G LayerAltC-E LayerAltB-C</span></span>
+<span><span class="co">#&gt; 1            1         0.2         0.4         0.6         0.8</span></span>
+<span><span class="co">#&gt; 4            1         0.2         0.4         0.6        -0.2</span></span>
+<span><span class="co">#&gt; 6            1         0.2         0.4        -0.4        -0.2</span></span>
+<span><span class="co">#&gt; 9            1         0.2        -0.6        -0.4        -0.2</span></span>
+<span><span class="co">#&gt; 11           1        -0.8        -0.6        -0.4        -0.2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Wait… what? 😕</p>
+</section></section><section id="the-comparison-matrix" class="level2"><h2 class="anchored" data-anchor-id="the-comparison-matrix">The Comparison Matrix</h2>
+<p>When I first started drafting this post, I made it to this point and noped out for a few days. My curiosity did win out eventually, and I hit the books (remembered <a href="https://twitter.com/CookieSci/status/1562221740230676481">this tweet</a> and <a href="https://twitter.com/bolkerb/status/1565077056169312257">this handout</a>, watched <a href="https://www.youtube.com/watch?v=yLgPpmXVVbs">this video</a>, read <a href="https://www.sciencedirect.com/science/article/pii/S0749596X19300695">this paper</a>, and read section 9.1.2 in <em>Applied Regression Analysis &amp; Generalized Linear Models</em>). Now, for the rest of the post.</p>
+<p>The best formal, citable source for what I describe here is <a href="https://www.sciencedirect.com/science/article/pii/S0749596X19300695">Schad and colleagues (2020)</a>, but what they call a “hypothesis matrix”, I’m calling a <em>comparison matrix</em>. I do this for two reasons: 1) to get away from hypothesis testing mindset (see Figure 1) and 2) because we are using the hypothesis matrix to apply a constraint among parameter values (remember that?).</p>
+<p>{% include figure image_path=“2023-07-bayes-sign.jpeg” alt=“In this house, we beleive: Bayes is good, estimate with uncertainty is better than hypothesis testing, math is hard, sampling is easy, Bayesian estimation wtih informative priors is indistinguishable from data falsifications, and it kicks ass.” caption=“Figure 1. The sign in my yard.” %}{: style=“max-width: 66%; display: block; margin: 2em auto;”}</p>
+<p>In this approach, we define the model parameters <strong><em>β</em></strong> by matrix-multiplying the the comparison matrix <strong>C</strong> (which activates or weights different level means) and the levels means <strong><em>μ</em></strong>.</p>
+<p><span class="math display">\[
+\mathbf{C}\boldsymbol{\mu} = \boldsymbol{\beta} \\
+\begin{bmatrix}
+  \textrm{weights for comparison 1} \\
+  \textrm{weights for comparison 2} \\
+  \textrm{weights for comparison 3} \\
+  \cdots \\
+\end{bmatrix}
+\begin{bmatrix}
+  \mu_1 \\
+  \mu_2 \\
+  \mu_3 \\
+  \cdots \\
+\end{bmatrix} =
+\begin{bmatrix}
+  \beta_0 \\
+  \beta_1 \\
+  \beta_2 \\
+  \cdots \\
+\end{bmatrix}
+\]</span></p>
+<p>So, in the dummy-coded version of the model, we had the following comparison matrix:</p>
+<p><span class="math display">\[
+\mathbf{C}_\text{dummy}\boldsymbol{\mu} = \boldsymbol{\beta}_\text{dummy} \\
+\begin{bmatrix}
+  1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 \\
+  -1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\
+  -1 &amp; 0 &amp; 1 &amp; 0 &amp; 0 \\
+  -1 &amp; 0 &amp; 0 &amp; 1 &amp; 0 \\
+  -1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \\
+\end{bmatrix}
+\begin{bmatrix}
+  \mu_{\text{Layer B}} \\
+  \mu_{\text{Layer C}} \\
+  \mu_{\text{Layer E}} \\
+  \mu_{\text{Layer G}} \\
+  \mu_{\text{Layer I}} \\
+\end{bmatrix} =
+\begin{bmatrix}
+  \beta_0: \mu_{\text{Layer B}} \\
+  \beta_1: \mu_{\text{Layer C}} - \mu_{\text{Layer B}} \\
+  \beta_2: \mu_{\text{Layer E}} - \mu_{\text{Layer B}} \\
+  \beta_3: \mu_{\text{Layer G}} - \mu_{\text{Layer B}} \\
+  \beta_4: \mu_{\text{Layer I}} - \mu_{\text{Layer B}} \\
+\end{bmatrix}
+\]</span></p>
+<p>The first row in <strong>C</strong> sets the Layer B as the reference value for the dummy coding. The second row turns on both Layer B and Layer C, but Layer B is negatively weighted. Thus, the corresponding model coefficient is the difference between Layers C and B.</p>
+<p>The comparison matrix for the reverse successive difference contrast coding is similar. The first row activates all of the layers buts equally weights them, so we get a mean of means for the model intercept. Each row after the first is the difference between two layer means.</p>
+<p><span class="math display">\[
+\mathbf{C}_\text{rev-diffs}\boldsymbol{\mu} = \boldsymbol{\beta}_\text{rev-diffs} \\
+\begin{bmatrix}
+  .2 &amp; .2 &amp; .2 &amp; .2 &amp; .2 \\
+  0 &amp;  0 &amp;  0 &amp;  1 &amp; -1 \\
+  0 &amp;  0 &amp;  1 &amp; -1 &amp;  0 \\
+  0 &amp;  1 &amp; -1 &amp;  0 &amp;  0 \\
+  1 &amp; -1 &amp;  0 &amp;  0 &amp;  0 \\
+\end{bmatrix}
+\begin{bmatrix}
+  \mu_{\text{Layer B}} \\
+  \mu_{\text{Layer C}} \\
+  \mu_{\text{Layer E}} \\
+  \mu_{\text{Layer G}} \\
+  \mu_{\text{Layer I}} \\
+\end{bmatrix} =
+\begin{bmatrix}
+  \beta_0: \text{mean of } \mu \\
+  \beta_1: \mu_{\text{Layer G}} - \mu_{\text{Layer I}} \\
+  \beta_2: \mu_{\text{Layer E}} - \mu_{\text{Layer G}} \\
+  \beta_3: \mu_{\text{Layer C}} - \mu_{\text{Layer E}} \\
+  \beta_4: \mu_{\text{Layer B}} - \mu_{\text{Layer C}} \\
+\end{bmatrix}
+\]</span></p>
+<p>Now, here is the magic part 🔮. Multiplying both sides by the inverse of the comparison matrix will set up a design matrix for the linear model which follows the contract for the contrast matrices I described above:</p>
+<p><span class="math display">\[
+\mathbf{C}\boldsymbol{\mu} = \boldsymbol{\beta} \\
+\mathbf{C}^{-1}\mathbf{C}\boldsymbol{\mu} = \mathbf{C}^{-1}\boldsymbol{\beta} \\
+\boldsymbol{\mu} = \mathbf{C}^{-1}\boldsymbol{\beta} \\
+\mathbf{\hat y} = \mathbf{X}\boldsymbol{\beta} \\
+\]</span></p>
+<p>So, we can invert<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> our comparison matrix to get the model’s contrast matrix:</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">comparisons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>  <span class="fl">.2</span>, <span class="fl">.2</span>, <span class="fl">.2</span>, <span class="fl">.2</span>, <span class="fl">.2</span>,</span>
+<span>   <span class="fl">0</span>,  <span class="fl">0</span>,  <span class="fl">0</span>,  <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>,</span>
+<span>   <span class="fl">0</span>,  <span class="fl">0</span>,  <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>,  <span class="fl">0</span>,</span>
+<span>   <span class="fl">0</span>,  <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>,  <span class="fl">0</span>,  <span class="fl">0</span>,</span>
+<span>   <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>,  <span class="fl">0</span>,  <span class="fl">0</span>,  <span class="fl">0</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mat_comparisons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="va">comparisons</span>, nrow <span class="op">=</span> <span class="fl">5</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="va">mat_comparisons</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      [,1] [,2] [,3] [,4] [,5]</span></span>
+<span><span class="co">#&gt; [1,]    1  0.2  0.4  0.6  0.8</span></span>
+<span><span class="co">#&gt; [2,]    1  0.2  0.4  0.6 -0.2</span></span>
+<span><span class="co">#&gt; [3,]    1  0.2  0.4 -0.4 -0.2</span></span>
+<span><span class="co">#&gt; [4,]    1  0.2 -0.6 -0.4 -0.2</span></span>
+<span><span class="co">#&gt; [5,]    1 -0.8 -0.6 -0.4 -0.2</span></span>
+<span></span>
+<span><span class="va">mat_m2</span></span>
+<span><span class="co">#&gt;    (Intercept) LayerAltG-I LayerAltE-G LayerAltC-E LayerAltB-C</span></span>
+<span><span class="co">#&gt; 1            1         0.2         0.4         0.6         0.8</span></span>
+<span><span class="co">#&gt; 4            1         0.2         0.4         0.6        -0.2</span></span>
+<span><span class="co">#&gt; 6            1         0.2         0.4        -0.4        -0.2</span></span>
+<span><span class="co">#&gt; 9            1         0.2        -0.6        -0.4        -0.2</span></span>
+<span><span class="co">#&gt; 11           1        -0.8        -0.6        -0.4        -0.2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Or, perhaps more commonly, we can take the contrast matrix used by a model and recover the comparison matrix, which is a nice trick when we have R automatically set the contrast values for us:</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Dummy coding example</span></span>
+<span><span class="va">mat_m1</span></span>
+<span><span class="co">#&gt;    (Intercept) LayerC LayerE LayerG LayerI</span></span>
+<span><span class="co">#&gt; 1            1      0      0      0      0</span></span>
+<span><span class="co">#&gt; 4            1      1      0      0      0</span></span>
+<span><span class="co">#&gt; 6            1      0      1      0      0</span></span>
+<span><span class="co">#&gt; 9            1      0      0      1      0</span></span>
+<span><span class="co">#&gt; 11           1      0      0      0      1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="va">mat_m1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;              1 4 6 9 11</span></span>
+<span><span class="co">#&gt; (Intercept)  1 0 0 0  0</span></span>
+<span><span class="co">#&gt; LayerC      -1 1 0 0  0</span></span>
+<span><span class="co">#&gt; LayerE      -1 0 1 0  0</span></span>
+<span><span class="co">#&gt; LayerG      -1 0 0 1  0</span></span>
+<span><span class="co">#&gt; LayerI      -1 0 0 0  1</span></span>
+<span></span>
+<span><span class="co"># Successive differences coding example</span></span>
+<span><span class="va">mat_m2</span></span>
+<span><span class="co">#&gt;    (Intercept) LayerAltG-I LayerAltE-G LayerAltC-E LayerAltB-C</span></span>
+<span><span class="co">#&gt; 1            1         0.2         0.4         0.6         0.8</span></span>
+<span><span class="co">#&gt; 4            1         0.2         0.4         0.6        -0.2</span></span>
+<span><span class="co">#&gt; 6            1         0.2         0.4        -0.4        -0.2</span></span>
+<span><span class="co">#&gt; 9            1         0.2        -0.6        -0.4        -0.2</span></span>
+<span><span class="co">#&gt; 11           1        -0.8        -0.6        -0.4        -0.2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="va">mat_m2</span><span class="op">)</span></span>
+<span><span class="co">#&gt;               1    4    6    9   11</span></span>
+<span><span class="co">#&gt; (Intercept) 0.2  0.2  0.2  0.2  0.2</span></span>
+<span><span class="co">#&gt; LayerAltG-I 0.0  0.0  0.0  1.0 -1.0</span></span>
+<span><span class="co">#&gt; LayerAltE-G 0.0  0.0  1.0 -1.0  0.0</span></span>
+<span><span class="co">#&gt; LayerAltC-E 0.0  1.0 -1.0  0.0  0.0</span></span>
+<span><span class="co">#&gt; LayerAltB-C 1.0 -1.0  0.0  0.0  0.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As I said earlier, there are all kinds of contrast coding schemes which allow us to define the model parameters in terms of specific comparisons, and this post only mentions two such schemes (dummy coding and a reversed version of successive differences coding).</p>
+</section><section id="finally-in-layer-i-of-this-post-the-brms-model" class="level2"><h2 class="anchored" data-anchor-id="finally-in-layer-i-of-this-post-the-brms-model">Finally, in Layer I of this post, the brms model</h2>
+<p>Now that we know about contrasts, and how they let us define model parameters in terms of the comparisons we want to make, we can use this technique to enforce an ordering constraint.</p>
+<p>We set up our model as in Ben-Shachar’s <a href="https://blog.msbstats.info/posts/2023-06-26-order-constraints-in-brms/" title="Order Constraints in Bayes Models (with brms)">post</a>, but here we set a prior for <code>normal(500, 250)</code> on the non-intercept coefficients with a lower-bound of 0 <code>lb = 0</code> to enforce the ordering constraint.</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms">brms</a></span><span class="op">)</span></span>
+<span><span class="va">priors</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/brms/man/set_prior.html">set_prior</a></span><span class="op">(</span><span class="st">"normal(-5975, 1000)"</span>, class <span class="op">=</span> <span class="st">"Intercept"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/brms/man/set_prior.html">set_prior</a></span><span class="op">(</span><span class="st">"normal(500, 250)"</span>, class <span class="op">=</span> <span class="st">"b"</span>, lb <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/brms/man/set_prior.html">set_prior</a></span><span class="op">(</span><span class="st">"exponential(0.01)"</span>, class <span class="op">=</span> <span class="st">"sigma"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/brms/man/validate_prior.html">validate_prior</a></span><span class="op">(</span></span>
+<span>  <span class="va">priors</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/brms/man/brmsformula.html">bf</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">|</span> <span class="fu">se</span><span class="op">(</span><span class="va">error</span>, sigma <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">LayerAlt</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">table1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;                prior     class        coef group resp dpar nlpar lb ub</span></span>
+<span><span class="co">#&gt;     normal(500, 250)         b                                    0   </span></span>
+<span><span class="co">#&gt;     normal(500, 250)         b LayerAltBMC                        0   </span></span>
+<span><span class="co">#&gt;     normal(500, 250)         b LayerAltCME                        0   </span></span>
+<span><span class="co">#&gt;     normal(500, 250)         b LayerAltEMG                        0   </span></span>
+<span><span class="co">#&gt;     normal(500, 250)         b LayerAltGMI                        0   </span></span>
+<span><span class="co">#&gt;  normal(-5975, 1000) Intercept                                        </span></span>
+<span><span class="co">#&gt;    exponential(0.01)     sigma                                    0   </span></span>
+<span><span class="co">#&gt;        source</span></span>
+<span><span class="co">#&gt;          user</span></span>
+<span><span class="co">#&gt;  (vectorized)</span></span>
+<span><span class="co">#&gt;  (vectorized)</span></span>
+<span><span class="co">#&gt;  (vectorized)</span></span>
+<span><span class="co">#&gt;  (vectorized)</span></span>
+<span><span class="co">#&gt;          user</span></span>
+<span><span class="co">#&gt;          user</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We fit the model:</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/brm.html">brm</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/brms/man/brmsformula.html">bf</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">|</span> <span class="fu">se</span><span class="op">(</span><span class="va">error</span>, sigma <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">LayerAlt</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">gaussian</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="va">priors</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">table1</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">4321</span>,</span>
+<span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">4</span>, </span>
+<span>  <span class="co"># caching</span></span>
+<span>  file <span class="op">=</span> <span class="st">"2023-07-03"</span>, </span>
+<span>  file_refit <span class="op">=</span> <span class="st">"on_change"</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can see that the level differences are indeed positive with 95% intervals of positive values.</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Family: gaussian </span></span>
+<span><span class="co">#&gt;   Links: mu = identity; sigma = identity </span></span>
+<span><span class="co">#&gt; Formula: C14 | se(error, sigma = TRUE) ~ 1 + LayerAlt </span></span>
+<span><span class="co">#&gt;    Data: table1 (Number of observations: 12) </span></span>
+<span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
+<span><span class="co">#&gt;          total post-warmup draws = 4000</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Population-Level Effects: </span></span>
+<span><span class="co">#&gt;             Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; Intercept   -5957.60     27.91 -6011.89 -5900.71 1.00     1964     1715</span></span>
+<span><span class="co">#&gt; LayerAltGMI   211.00     82.29    51.67   378.86 1.00     1693      939</span></span>
+<span><span class="co">#&gt; LayerAltEMG   206.15     71.30    68.47   349.07 1.00     1937     1185</span></span>
+<span><span class="co">#&gt; LayerAltCME   105.55     62.84     7.90   243.81 1.00     1377     1023</span></span>
+<span><span class="co">#&gt; LayerAltBMC   145.95     65.13    23.63   279.12 1.00     1684      857</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Family Specific Parameters: </span></span>
+<span><span class="co">#&gt;       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; sigma    79.03     26.95    41.05   142.49 1.00     1651     2149</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
+<span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
+<span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span>
+<span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/MCMC-intervals.html">mcmc_intervals</a></span><span class="op">(</span><span class="va">m3</span>, regex_pars <span class="op">=</span> <span class="st">"Layer"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="index_files/figure-html/level-diffs-1.png" class="img-fluid figure-img" width="2100"></p>
+<figcaption class="figure-caption">Estimates of the level differences.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/brms/man/conditional_effects.brmsfit.html">conditional_effects</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="index_files/figure-html/level-means-1.png" class="img-fluid figure-img" width="2100"></p>
+<figcaption class="figure-caption">Conditional means for each layer.</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="normally-i-dont-think-you-need-contrast-codes" class="level2"><h2 class="anchored" data-anchor-id="normally-i-dont-think-you-need-contrast-codes">Normally, I don’t think you need contrast codes</h2>
+<p>My general advice for contrast coding is to just fit the model and then have the software compute the appropriate estimates and comparisons afterwards on the outcome scale. For example, <a href="https://cran.r-project.org/web/packages/emmeans/vignettes/comparisons.html">emmeans</a> can take a fitted model, run requested comparisons, and handle multiple comparisons and <em>p</em>-value adjustments for us. <a href="https://vincentarelbundock.github.io/marginaleffects/">marginaleffects</a> probably does this too. (I really need to play with it.) And in a Bayesian model, we can compute comparisons of interest by doing math on the posterior samples (estimating things and computing differences and summarizing the distribution of the differences), but this particular model, where the coding was needed to impose the prior ordering constraint, ruled out the posterior post-processing approach.</p>
+<hr>
+<p>Session info:</p>
+<div class="cell" data-fig.asp="0.618">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">.session_info</span></span>
+<span><span class="co">#&gt; ─ Session info ───────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt;  setting         value</span></span>
+<span><span class="co">#&gt;  version         R version 4.3.0 (2023-04-21 ucrt)</span></span>
+<span><span class="co">#&gt;  os              Windows 11 x64 (build 22621)</span></span>
+<span><span class="co">#&gt;  system          x86_64, mingw32</span></span>
+<span><span class="co">#&gt;  ui              RTerm</span></span>
+<span><span class="co">#&gt;  language        (EN)</span></span>
+<span><span class="co">#&gt;  collate         English_United States.utf8</span></span>
+<span><span class="co">#&gt;  ctype           English_United States.utf8</span></span>
+<span><span class="co">#&gt;  tz              America/Chicago</span></span>
+<span><span class="co">#&gt;  date            2023-07-17</span></span>
+<span><span class="co">#&gt;  pandoc          3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)</span></span>
+<span><span class="co">#&gt;  stan (rstan)    2.26.1</span></span>
+<span><span class="co">#&gt;  stan (cmdstanr) 2.32.0</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Packages ───────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt;  ! package        * version date (UTC) lib source</span></span>
+<span><span class="co">#&gt;    abind            1.4-5   2016-07-21 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    backports        1.4.1   2021-12-13 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    base64enc        0.1-3   2015-07-28 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    bayesplot        1.10.0  2022-11-16 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    bridgesampling   1.1-2   2021-04-16 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    brms           * 2.19.0  2023-03-14 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    Brobdingnag      1.2-9   2022-10-19 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    cachem           1.0.8   2023-05-01 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    callr            3.7.3   2022-11-02 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    checkmate        2.2.0   2023-04-27 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    cli              3.6.1   2023-03-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    cmdstanr         0.5.3   2023-04-24 [1] github (stan-dev/cmdstanr)</span></span>
+<span><span class="co">#&gt;    coda             0.19-4  2020-09-30 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    codetools        0.2-19  2023-02-01 [2] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    colorspace       2.1-0   2023-01-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    colourpicker     1.2.0   2022-10-28 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    crayon           1.5.2   2022-09-29 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    crosstalk        1.2.0   2021-11-04 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    curl             5.0.1   2023-06-07 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    digest           0.6.33  2023-07-07 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    distributional   0.3.2   2023-03-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    downlit          0.4.3   2023-06-29 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    dplyr          * 1.1.2   2023-04-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    DT               0.28    2023-05-18 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    dygraphs         1.1.1.6 2018-07-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    ellipsis         0.3.2   2021-04-29 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    emmeans          1.8.7   2023-06-23 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    estimability     1.4.1   2022-08-05 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    evaluate         0.21    2023-05-05 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    fansi            1.0.4   2023-01-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    farver           2.1.1   2022-07-06 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    fastmap          1.1.1   2023-02-24 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    forcats        * 1.0.0   2023-01-29 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    generics         0.1.3   2022-07-05 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    ggplot2        * 3.4.2   2023-04-03 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    glue             1.6.2   2022-02-24 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    gridExtra        2.3     2017-09-09 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    gtable           0.3.3   2023-03-21 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    gtools           3.9.4   2022-11-27 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    hms              1.1.3   2023-03-21 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    htmltools        0.5.5   2023-03-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    htmlwidgets      1.6.2   2023-03-17 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    httpuv           1.6.11  2023-05-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    igraph           1.5.0   2023-06-16 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    inline           0.3.19  2021-05-31 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    jsonlite         1.8.7   2023-06-29 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    knitr            1.43    2023-05-25 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    labeling         0.4.2   2020-10-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    later            1.3.1   2023-05-02 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    lattice          0.21-8  2023-04-05 [2] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    lifecycle        1.0.3   2022-10-07 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    loo              2.6.0   2023-03-31 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    lubridate      * 1.9.2   2023-02-10 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    magrittr         2.0.3   2022-03-30 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    markdown         1.7     2023-05-16 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    MASS           * 7.3-60  2023-05-04 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    Matrix           1.6-0   2023-07-08 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    matrixStats      1.0.0   2023-06-02 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    memoise          2.0.1   2021-11-26 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    mime             0.12    2021-09-28 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    miniUI           0.1.1.1 2018-05-18 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    munsell          0.5.0   2018-06-12 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    mvtnorm          1.2-2   2023-06-08 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    nlme             3.1-162 2023-01-31 [2] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    pillar           1.9.0   2023-03-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    pkgbuild         1.4.2   2023-06-26 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    pkgconfig        2.0.3   2019-09-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    plyr             1.8.8   2022-11-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    posterior        1.4.1   2023-03-14 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    prettyunits      1.1.1   2020-01-24 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    processx         3.8.2   2023-06-30 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    promises         1.2.0.1 2021-02-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    ps               1.7.5   2023-04-18 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    purrr          * 1.0.1   2023-01-10 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    R6               2.5.1   2021-08-19 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    ragg             1.2.5   2023-01-12 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    Rcpp           * 1.0.11  2023-07-06 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;  D RcppParallel     5.1.7   2023-02-27 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    readr          * 2.1.4   2023-02-10 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    reshape2         1.4.4   2020-04-09 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rlang            1.1.1   2023-04-28 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rmarkdown        2.23    2023-07-01 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rstan            2.26.22 2023-05-02 [1] local</span></span>
+<span><span class="co">#&gt;    rstantools       2.3.1   2023-03-30 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rstudioapi       0.15.0  2023-07-07 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    scales           1.2.1   2022-08-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    sessioninfo      1.2.2   2021-12-06 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    shiny            1.7.4.1 2023-07-06 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    shinyjs          2.1.0   2021-12-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    shinystan        2.6.0   2022-03-03 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    shinythemes      1.2.0   2021-01-25 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    StanHeaders      2.26.27 2023-06-14 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    stringi          1.7.12  2023-01-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    stringr        * 1.5.0   2022-12-02 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    systemfonts      1.0.4   2022-02-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    tensorA          0.36.2  2020-11-19 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    textshaping      0.3.6   2021-10-13 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    threejs          0.3.3   2020-01-21 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    tibble         * 3.2.1   2023-03-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    tidyr          * 1.3.0   2023-01-24 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    tidyselect       1.2.0   2022-10-10 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    tidyverse      * 2.0.0   2023-02-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    timechange       0.2.0   2023-01-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    tzdb             0.4.0   2023-05-12 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    utf8             1.2.3   2023-01-31 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    V8               4.3.2   2023-06-30 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    vctrs            0.6.3   2023-06-14 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    withr            2.5.0   2022-03-03 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    xfun             0.39    2023-04-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    xtable           1.8-4   2019-04-21 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    xts              0.13.1  2023-04-16 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    yaml             2.3.7   2023-01-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    zoo              1.8-12  2023-04-13 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  [1] C:/Users/Tristan/AppData/Local/R/win-library/4.3</span></span>
+<span><span class="co">#&gt;  [2] C:/Program Files/R/R-4.3.0/library</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  D ── DLL MD5 mismatch, broken installation.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ──────────────────────────────────────────────────────────────────────────────</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<ol>
+<li id="fn1"><p>I use <a href="https://rdrr.io/r/base/solve.html"><code>solve()</code></a> here for the inversion, but <a href="https://www.sciencedirect.com/science/article/pii/S0749596X19300695">Schad and colleagues (2020)</a> use the generalized inverse <a href="https://rdrr.io/pkg/MASS/man/ginv.html"><code>MASS::ginv()</code></a> or <a href="https://cran.r-project.org/web/packages/matlib/vignettes/ginv.html"><code>matlib::Ginv()</code></a>. <code><a href="https://rdrr.io/r/base/solve.html">solve()</a></code> only works on square matrices, but the generalized inverse works on non-square matrices.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

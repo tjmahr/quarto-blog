@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/bayesian-ordering-constraint/index.html",
       "/posts/welcome/index.html",
       "/posts/confusion-matrix-late-talkers/index.html"
     ]
