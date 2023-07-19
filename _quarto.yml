@@ -4,7 +4,8 @@ project:
 
 website:
   repo-url: "https://github.com/tjmahr/quarto-blog"
-  title: "Higher Order Functions"
+  # title: "Higher Order Functions"
+  title: "my experimental quarto blog"
   navbar:
     right:
       - about.qmd
