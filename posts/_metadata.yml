@@ -14,7 +14,7 @@ code-tools:
   source: repo
 
 toc: true
-toc-title: Table of contents
+toc-title: Contents
 toc-location: left
 
 knitr:

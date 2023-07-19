@@ -79,7 +79,7 @@ constraint:
     `reject`][reject-docs] has a section titled "Rejection is not for
     constraints".
 
-3.  Use brms's monotonic effect [`mo()`][brms-mo] syntax.
+3.  Use brms's monotonic effect `mo()` syntax.
 
 In this post, I am going to add another option to this list: 
 
@@ -136,7 +136,7 @@ Here, the `(Intercept)` is the mean of the reference level, and the
 reference level is the level of the categorical variable not listed in
 the other parameter names (`LayerB`). Each of the other parameters is a
 difference from that reference level. Layer C's mean is `(Intercept)` +
-`LayerC`. The `r auto("model.matrix()")` shows how these
+`LayerC`. The `model.matrix()` shows how these
 categorical variables are coded in the model's design/contrast matrix:
 
 ```{r}
@@ -187,11 +187,11 @@ coding. In this scheme:
   - The intercept is the mean of the levels means
   - Parameters estimate the difference between adjacent levels
   - but I have to reverse how the levels are ordered in the underlying
-    `r auto("factor()")` so that the differences are positive, comparing each
+    `factor()` so that the differences are positive, comparing each
     layer with the one *below* it. (`LayerB - LayerC` should be positive).
 
 We apply this coding by creating a new factor and setting the
-[`contrast()`](https://rdrr.io/r/stats/contrasts.html). R lets us set
+`contrast()`. R lets us set
 the contrast to the name of a function that computes contrasts, so
 we use `"contr.sdif"`.
 
@@ -499,17 +499,15 @@ constraint, ruled out the posterior post-processing approach.
 
 [reject-docs]: https://mc-stan.org/docs/reference-manual/reject-statements.html "Stan Manual: Reject statements"
 
-[brms-mo]: https://paul-buerkner.github.io/brms/articles/brms_monotonic.html "Estimating Monotonic Effects with brms"
-
 [ucla-cc]: https://stats.oarc.ucla.edu/spss/faq/coding-systems-for-categorical-variables-in-regression-analysis/ "https://stats.oarc.ucla.edu/spss/faq/coding-systems-for-categorical-variables-in-regression-analysis/"
 
 [debruine-cc]: https://debruine.github.io/faux/articles/contrasts.html
 
 
-[^invert]: I use `r auto("solve()")` here for the inversion, but [Schad and 
+[^invert]: I use `solve()` here for the inversion, but [Schad and 
     colleagues 
     (2020)](https://www.sciencedirect.com/science/article/pii/S0749596X19300695) 
-    use the generalized inverse `r auto("MASS::ginv()")` or 
+    use the generalized inverse `MASS::ginv()` or 
     [`matlib::Ginv()`](https://cran.r-project.org/web/packages/matlib/vignettes/ginv.html). 
     `solve()` only works on square matrices, but the generalized inverse 
     works on non-square matrices. 

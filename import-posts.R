@@ -1,7 +1,4 @@
-url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2023-07-03-bayesian-ordering-constraint.Rmd"
-
-
-import_post <- function(url_raw) {
+import_jekyll_post <- function(url_raw, overwrite = FALSE) {
   file <- file.path(tempdir(), basename(url_raw))
   download_result <- download.file(url_raw, file, quiet = TRUE)
 
@@ -24,8 +21,17 @@ import_post <- function(url_raw) {
     data_file$lines_body
   )
 
-  readr::write_lines(data_file$lines_migrated, data_file$path_post)
-  cli::cli_alert_success("Created {.path {data_file$path_post}}")
+  if (!overwrite & file.exists(data_file$path_post)) {
+    cli::cli_warn(c(
+      "!" = "{.path {data_file$path_post}} already exists.",
+      "*" = "Set {.arg  overwrite = TRUE} to replace files "
+    ))
+  } else {
+    readr::write_lines(data_file$lines_migrated, data_file$path_post)
+    cli::cli_alert_success("Created {.path {data_file$path_post}}")
+  }
+
+  data_file$lines_current <- readr::read_lines(data_file$path_post)
   invisible(data_file)
 }
 
@@ -146,28 +152,48 @@ migrate_assets <- function(data_file, base_url = "https://raw.githubusercontent.
 
 
 check_post <- function(lines) {
-  check_jekyll <- function(xs) {
-    jekyll_lines <- stringr::str_which(xs, "\\{%|\\{:")
-    any_found <- length(jekyll_lines) > 0
-    if (any_found) {
-      cli::cli_warn("Jekyll macro syntax found on line(s): {jekyll_lines}")
+  create_regex_checker <- function(pattern, message) {
+    function(xs) {
+      pattern_main <- pattern
+      pattern_preview <- paste0(".{0,30}(", pattern_main, ").{0,30}")
+      lines_flagged <- stringr::str_which(xs, pattern_main)
+      any_found <- length(lines_flagged) > 0
+      if (any_found) {
+        previews <- xs[lines_flagged] |>
+          stringr::str_extract(pattern_preview)
+        l <- glue::glue(
+          "[<<<lines_flagged>>>] <<<previews>>>",
+          .open = "<<<",
+          .close = ">>>"
+        )
+        cli::cli_warn(c(
+          "{message}",
+          cli::format_bullets_raw(l)
+        ))
+      }
+      invisible(any_found)
     }
-    invisible(any_found)
   }
 
-  check_assets <- function(xs) {
-    asset_lines <- stringr::str_which(xs, "assets/")
-    any_found <- length(asset_lines) > 0
-    if (any_found) {
-      cli::cli_warn("`/assets/` paths found on line(s): {asset_lines}")
-    }
-    invisible(any_found)
-  }
-
-  any(
-    check_assets(lines),
-    check_jekyll(lines)
+  check_jekyll <- create_regex_checker(
+    "\\{%|\\{:",
+    "Jekyll macro syntax found:"
   )
+  check_assets <- create_regex_checker(
+    "assets/",
+    "`/assets/` paths found:"
+  )
+  check_codelinks <- create_regex_checker(
+    "\\[`\\w+",
+    "Manually linked code found:"
+  )
+
+  result <- any(
+    check_assets(lines),
+    check_jekyll(lines),
+    check_codelinks(lines)
+  )
+  invisible(result)
 }
 
 
@@ -178,6 +204,7 @@ check_post <- function(lines) {
 
 
 
+url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2023-07-03-bayesian-ordering-constraint.Rmd"
 
-d <- import_post(url_raw)
-check_post(d$lines_migrated)
+d <- import_jekyll_post(url_raw)
+check_post(d$lines)

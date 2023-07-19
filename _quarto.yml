@@ -15,14 +15,18 @@ website:
 format:
   html:
     theme: sandstone
-    css: styles.css
+    css:
+      - downlit-underline.css
     fig-width: 6
     fig-asp: 0.618
     fig-dpi: 300
+    out-width: "80%"
     fig-align: "center"
     fig-cap-location: "margin"
-    linkcolor: "#f5333b"
-    fontsize: 1em
+    # linkcolor: "#f5333b"
+    fontsize: 1.1em
     linestretch: 1.5
 
+# highlight-style
+# syntax-definitions
 

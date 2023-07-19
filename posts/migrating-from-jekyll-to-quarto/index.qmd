@@ -16,7 +16,7 @@ Okay!
 
 ***
 
-I want a banner image on top like the old site with a credit.
+I want a banner image on top like the old site with a credit to the source.
 
 I had to put `fig-width: 8` under `format > html` in `_quarto.yml`. I also pushed other knitr options here: 
 
@@ -31,8 +31,17 @@ I got to opt into `fig-cap-location: "margin"`.
 
 I had to remove the old knitr _cached stuff. Still need a different solution.
 
+I don't want the green links. If I set the link color, that still leaves the green 
+link color in the table of contents.
+
+All of my old manual downlit attempts are styled differently than actual downlit urls.
+
+I want a slightly larger font size.
+
+I want underlined downlit links.
 
 I have to convert fig.alt and fig.cap to here.
+
 ```
 #| fig-alt: "Examples of `plot_dist()`"
 #| fig-cap:
