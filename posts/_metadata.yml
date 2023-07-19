@@ -13,15 +13,14 @@ code-link: true
 code-tools:
   source: repo
 
+toc: true
+toc-title: Table of contents
+toc-location: left
+
 knitr:
   opts_chunk:
     collapse: true
     comment: "#>"
-    fig-asp: 0.618
-    fig-width: 6
-    dpi: 300
-    fig-align: "center"
     dev: "ragg_png"
     out-width: "80%"
-    fig-cap: "center"
 

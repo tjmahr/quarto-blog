@@ -1,0 +1,39 @@
+---
+title: "playing with quatro"
+description: "this is STILL in beta"
+date: "2023-07-02"
+date-modified: "`r format(Sys.Date())`"
+categories: [meta, dev]
+---
+
+This is the **not** first post in a Quarto blog. Welcome!
+
+![](thumbnail.jpg)
+
+Since this post doesn't specify an explicit `image`, the first image in the post will be used in the listing page of posts. 
+
+Okay!
+
+***
+
+I want a banner image on top like the old site with a credit.
+
+I had to put `fig-width: 8` under `format > html` in `_quarto.yml`. I also pushed other knitr options here: 
+
+```
+    fig-asp: 0.618
+    fig-dpi: 300
+    fig-align: "center"
+    fig-cap-location: "margin"
+```
+
+I got to opt into `fig-cap-location: "margin"`.
+
+I had to remove the old knitr _cached stuff. Still need a different solution.
+
+
+I have to convert fig.alt and fig.cap to here.
+```
+#| fig-alt: "Examples of `plot_dist()`"
+#| fig-cap:
+```
