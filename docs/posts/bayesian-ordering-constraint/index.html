@@ -96,9 +96,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 background-size: cover;
       }
 </style>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><link rel="stylesheet" href="../../styles.css">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><link rel="stylesheet" href="../../downlit-underline.css">
 </head>
-<body class="nav-fixed fullcontent">
+<body class="floating nav-fixed slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
@@ -132,7 +132,7 @@ background-size: cover;
 </div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
-    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full"><div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <div class="quarto-title-block"><div><h1 class="title">Ordering constraints in brms using contrast coding</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/tjmahr/quarto-blog/blob/main/posts/bayesian-ordering-constraint/index.qmd"><i class="bi"></i> Code</button></div></div>
                   <div>
@@ -163,7 +163,7 @@ background-size: cover;
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">July 17, 2023</p>
+        <p class="date-modified">July 19, 2023</p>
       </div>
     </div>
       
@@ -172,11 +172,27 @@ background-size: cover;
   
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
+   
+  <ul>
+<li><a href="#big-idea-of-contrast-coding" id="toc-big-idea-of-contrast-coding" class="nav-link active" data-scroll-target="#big-idea-of-contrast-coding">Big idea of contrast coding</a></li>
+  <li>
+<a href="#the-default-dummy-coding" id="toc-the-default-dummy-coding" class="nav-link" data-scroll-target="#the-default-dummy-coding">The default: dummy coding</a>
+  <ul class="collapse">
+<li><a href="#successive-differences-coding" id="toc-successive-differences-coding" class="nav-link" data-scroll-target="#successive-differences-coding">Successive differences coding</a></li>
+  </ul>
+</li>
+  <li><a href="#the-comparison-matrix" id="toc-the-comparison-matrix" class="nav-link" data-scroll-target="#the-comparison-matrix">The Comparison Matrix</a></li>
+  <li><a href="#finally-in-layer-i-of-this-post-the-brms-model" id="toc-finally-in-layer-i-of-this-post-the-brms-model" class="nav-link" data-scroll-target="#finally-in-layer-i-of-this-post-the-brms-model">Finally, in Layer I of this post, the brms model</a></li>
+  <li><a href="#normally-i-dont-think-you-need-contrast-codes" id="toc-normally-i-dont-think-you-need-contrast-codes" class="nav-link" data-scroll-target="#normally-i-dont-think-you-need-contrast-codes">Normally, I don’t think you need contrast codes</a></li>
+  </ul></nav>
+</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content"><p>Mattan S. Ben-Shachar wrote an <a href="https://blog.msbstats.info/posts/2023-06-26-order-constraints-in-brms/" title="Order Constraints in Bayes Models (with brms)">excellent tutorial</a> about how to impose ordering constraints in Bayesian regression models. In that post, the data comes from archaeology (inspired by <a href="https://arxiv.org/abs/1704.07141">Buck, 2017</a> but not an exact copy). We have samples from different layers (<code>Layer</code>) in a site, and for each sample, we have a <code>C14</code> radiocarbon date measurement and its associated measurement <code>error</code>.</p>
-<div class="cell" data-fig.asp="0.618">
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content"><p>Mattan S. Ben-Shachar wrote an <a href="https://blog.msbstats.info/posts/2023-06-26-order-constraints-in-brms/" title="Order Constraints in Bayes Models (with brms)">excellent tutorial</a> about how to impose ordering constraints in Bayesian regression models. In that post, the data comes from archaeology (inspired by <a href="https://arxiv.org/abs/1704.07141">Buck, 2017</a> but not an exact copy). We have samples from different layers (<code>Layer</code>) in a site, and for each sample, we have a <code>C14</code> radiocarbon date measurement and its associated measurement <code>error</code>.</p>
+<div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">table1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html">tribble</a></span><span class="op">(</span></span>
@@ -205,7 +221,7 @@ background-size: cover;
 <ol type="1">
 <li><p>Fit the usual model but filter out posterior draws where the ordering constraint is violated.</p></li>
 <li><p>Have the Stan sampler <code>reject</code> draws where the constraint is violated. But note that the <a href="https://mc-stan.org/docs/reference-manual/reject-statements.html" title="Stan Manual: Reject statements">documentation for <code>reject</code></a> has a section titled “Rejection is not for constraints”.</p></li>
-<li><p>Use brms’s monotonic effect <a href="https://paul-buerkner.github.io/brms/articles/brms_monotonic.html" title="Estimating Monotonic Effects with brms"><code>mo()</code></a> syntax.</p></li>
+<li><p>Use brms’s monotonic effect <code><a href="https://rdrr.io/pkg/brms/man/mo.html">mo()</a></code> syntax.</p></li>
 </ol>
 <p>In this post, I am going to add another option to this list:</p>
 <ol start="4">
@@ -227,14 +243,14 @@ Use contrast coding so the model parameters represent the differences between su
 <li>Parameters estimate the difference between each other level and the reference level</li>
 </ul>
 <p>Let’s fit a simple linear model and work through the parameter meanings:</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">Layer</span>, <span class="va">table1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; (Intercept)      LayerC      LayerE      LayerG      LayerI </span></span>
 <span><span class="co">#&gt;  -5670.6667   -137.3333   -223.6667   -438.3333   -628.3333</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Here, the <code>(Intercept)</code> is the mean of the reference level, and the reference level is the level of the categorical variable not listed in the other parameter names (<code>LayerB</code>). Each of the other parameters is a difference from that reference level. Layer C’s mean is <code>(Intercept)</code> + <code>LayerC</code>. The <a href="https://rdrr.io/r/stats/model.matrix.html"><code>model.matrix()</code></a> shows how these categorical variables are coded in the model’s design/contrast matrix:</p>
-<div class="cell" data-fig.asp="0.618">
+<p>Here, the <code>(Intercept)</code> is the mean of the reference level, and the reference level is the level of the categorical variable not listed in the other parameter names (<code>LayerB</code>). Each of the other parameters is a difference from that reference level. Layer C’s mean is <code>(Intercept)</code> + <code>LayerC</code>. The <code><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix()</a></code> shows how these categorical variables are coded in the model’s design/contrast matrix:</p>
+<div class="cell">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Matrix has 1 row per observation but we just want 1 per category level</span></span>
 <span><span class="va">mat_m1</span> <span class="op">&lt;-</span> <span class="va">m1</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -253,7 +269,7 @@ Use contrast coding so the model parameters represent the differences between su
 \mathbf{\hat y} = \mathbf{X}\boldsymbol{\beta}
 \]</span></p>
 <p>Think of this equation as a contract for a contrast coding scheme: Multiplying the contrast matrix by the model coefficients should give us the means of the category levels.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat_m1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         [,1]</span></span>
 <span><span class="co">#&gt; 1  -5670.667</span></span>
@@ -272,7 +288,7 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt; 5     I -6299.000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If the matrix multiplication is too quick, here it is in slow motion where each row has been weighted (multiplied) by coefficients:</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Sums of the rows are the means</span></span>
 <span><span class="va">mat_m1</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         [,1]      [,2]      [,3]      [,4]      [,5]</span></span>
@@ -287,10 +303,10 @@ Use contrast coding so the model parameters represent the differences between su
 <ul>
 <li>The intercept is the mean of the levels means</li>
 <li>Parameters estimate the difference between adjacent levels</li>
-<li>but I have to reverse how the levels are ordered in the underlying <a href="https://rdrr.io/r/base/factor.html"><code>factor()</code></a> so that the differences are positive, comparing each layer with the one <em>below</em> it. (<code>LayerB - LayerC</code> should be positive).</li>
+<li>but I have to reverse how the levels are ordered in the underlying <code><a href="https://rdrr.io/r/base/factor.html">factor()</a></code> so that the differences are positive, comparing each layer with the one <em>below</em> it. (<code>LayerB - LayerC</code> should be positive).</li>
 </ul>
-<p>We apply this coding by creating a new factor and setting the <a href="https://rdrr.io/r/stats/contrasts.html"><code>contrast()</code></a>. R lets us set the contrast to the name of a function that computes contrasts, so we use <code>"contr.sdif"</code>.</p>
-<div class="cell" data-fig.asp="0.618">
+<p>We apply this coding by creating a new factor and setting the <code>contrast()</code>. R lets us set the contrast to the name of a function that computes contrasts, so we use <code>"contr.sdif"</code>.</p>
+<div class="cell">
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">contr.sdif</span> <span class="op">&lt;-</span> <span class="fu">MASS</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/MASS/man/contr.sdif.html">contr.sdif</a></span></span>
 <span></span>
 <span><span class="co"># Reverse the factor levels</span></span>
@@ -299,14 +315,14 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="fu"><a href="https://rdrr.io/r/stats/contrasts.html">contrasts</a></span><span class="op">(</span><span class="va">table1</span><span class="op">$</span><span class="va">LayerAlt</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"contr.sdif"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Then we just fit the model as usual. As intended, the model’s coefficients are different.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">LayerAlt</span>, <span class="va">table1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; (Intercept) LayerAltG-I LayerAltE-G LayerAltC-E LayerAltB-C </span></span>
 <span><span class="co">#&gt; -5956.20000   190.00000   214.66667    86.33333   137.33333</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can compute the mean of layer means and the layer differences by hand to confirm that the model parameters are computing what we expect.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Make a list so we can write out the diffs easily</span></span>
 <span><span class="va">layer_means</span> <span class="op">&lt;-</span> <span class="va">table1</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Layer</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -337,7 +353,7 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt; LayerAltB-C   137.33333   137.33333</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Back to our contrast coding contract, we see that the contrast matrix matrix-multiplied by the model coefficients gives us the level means.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat_m2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">mat_m2</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">m2</span><span class="op">)</span></span>
@@ -358,7 +374,7 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt; 5     I -6299.000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>It’s so clean and simple. We still get the level means and the parameters estimate specific comparisons of interest to us. So, how are the categorical variables and their differences coded in the model’s contrast matrix?</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat_m2</span></span>
 <span><span class="co">#&gt;    (Intercept) LayerAltG-I LayerAltE-G LayerAltC-E LayerAltB-C</span></span>
 <span><span class="co">#&gt; 1            1         0.2         0.4         0.6         0.8</span></span>
@@ -453,7 +469,7 @@ Use contrast coding so the model parameters represent the differences between su
 \mathbf{\hat y} = \mathbf{X}\boldsymbol{\beta} \\
 \]</span></p>
 <p>So, we can invert<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> our comparison matrix to get the model’s contrast matrix:</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">comparisons</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
 <span>  <span class="fl">.2</span>, <span class="fl">.2</span>, <span class="fl">.2</span>, <span class="fl">.2</span>, <span class="fl">.2</span>,</span>
 <span>   <span class="fl">0</span>,  <span class="fl">0</span>,  <span class="fl">0</span>,  <span class="fl">1</span>, <span class="op">-</span><span class="fl">1</span>,</span>
@@ -480,7 +496,7 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt; 11           1        -0.8        -0.6        -0.4        -0.2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Or, perhaps more commonly, we can take the contrast matrix used by a model and recover the comparison matrix, which is a nice trick when we have R automatically set the contrast values for us:</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Dummy coding example</span></span>
 <span><span class="va">mat_m1</span></span>
 <span><span class="co">#&gt;    (Intercept) LayerC LayerE LayerG LayerI</span></span>
@@ -514,10 +530,10 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt; LayerAltB-C 1.0 -1.0  0.0  0.0  0.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>As I said earlier, there are all kinds of contrast coding schemes which allow us to define the model parameters in terms of specific comparisons, and this post only mentions two such schemes (dummy coding and a reversed version of successive differences coding).</p>
-</section><section id="finally-in-layer-i-of-this-post-the-brms-model" class="level2"><h2 class="anchored" data-anchor-id="finally-in-layer-i-of-this-post-the-brms-model">Finally, in Layer I of this post, the brms model</h2>
+</section><section id="finally-in-layer-i-of-this-post-the-brms-model" class="level2 page-columns page-full"><h2 class="anchored" data-anchor-id="finally-in-layer-i-of-this-post-the-brms-model">Finally, in Layer I of this post, the brms model</h2>
 <p>Now that we know about contrasts, and how they let us define model parameters in terms of the comparisons we want to make, we can use this technique to enforce an ordering constraint.</p>
 <p>We set up our model as in Ben-Shachar’s <a href="https://blog.msbstats.info/posts/2023-06-26-order-constraints-in-brms/" title="Order Constraints in Bayes Models (with brms)">post</a>, but here we set a prior for <code>normal(500, 250)</code> on the non-intercept coefficients with a lower-bound of 0 <code>lb = 0</code> to enforce the ordering constraint.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms">brms</a></span><span class="op">)</span></span>
 <span><span class="va">priors</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/brms/man/set_prior.html">set_prior</a></span><span class="op">(</span><span class="st">"normal(-5975, 1000)"</span>, class <span class="op">=</span> <span class="st">"Intercept"</span><span class="op">)</span> <span class="op">+</span> </span>
@@ -547,7 +563,7 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;          user</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We fit the model:</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">m3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/brms/man/brm.html">brm</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/brms/man/brmsformula.html">bf</a></span><span class="op">(</span><span class="va">C14</span> <span class="op">|</span> <span class="fu">se</span><span class="op">(</span><span class="va">error</span>, sigma <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">LayerAlt</span><span class="op">)</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">gaussian</a></span><span class="op">(</span><span class="st">"identity"</span><span class="op">)</span>,</span>
@@ -562,7 +578,7 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can see that the level differences are indeed positive with 95% intervals of positive values.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell page-columns page-full">
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: gaussian </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = identity </span></span>
@@ -587,19 +603,19 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
 <span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span>
 <span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/MCMC-intervals.html">mcmc_intervals</a></span><span class="op">(</span><span class="va">m3</span>, regex_pars <span class="op">=</span> <span class="st">"Layer"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="index_files/figure-html/level-diffs-1.png" class="img-fluid figure-img" width="2100"></p>
-<figcaption class="figure-caption">Estimates of the level differences.</figcaption></figure>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="index_files/figure-html/level-diffs-1.png" class="img-fluid figure-img" width="1800"></p>
+<figcaption class="figure-caption margin-caption">Estimates of the level differences.</figcaption></figure>
 </div>
 </div>
 </div>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell page-columns page-full">
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/brms/man/conditional_effects.brmsfit.html">conditional_effects</a></span><span class="op">(</span><span class="va">m3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure"><p><img src="index_files/figure-html/level-means-1.png" class="img-fluid figure-img" width="2100"></p>
-<figcaption class="figure-caption">Conditional means for each layer.</figcaption></figure>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="index_files/figure-html/level-means-1.png" class="img-fluid figure-img" width="1800"></p>
+<figcaption class="figure-caption margin-caption">Conditional means for each layer.</figcaption></figure>
 </div>
 </div>
 </div>
@@ -607,7 +623,7 @@ Use contrast coding so the model parameters represent the differences between su
 <p>My general advice for contrast coding is to just fit the model and then have the software compute the appropriate estimates and comparisons afterwards on the outcome scale. For example, <a href="https://cran.r-project.org/web/packages/emmeans/vignettes/comparisons.html">emmeans</a> can take a fitted model, run requested comparisons, and handle multiple comparisons and <em>p</em>-value adjustments for us. <a href="https://vincentarelbundock.github.io/marginaleffects/">marginaleffects</a> probably does this too. (I really need to play with it.) And in a Bayesian model, we can compute comparisons of interest by doing math on the posterior samples (estimating things and computing differences and summarizing the distribution of the differences), but this particular model, where the coding was needed to impose the prior ordering constraint, ruled out the posterior post-processing approach.</p>
 <hr>
 <p>Session info:</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">.session_info</span></span>
 <span><span class="co">#&gt; ─ Session info ───────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;  setting         value</span></span>
@@ -619,7 +635,7 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;  collate         English_United States.utf8</span></span>
 <span><span class="co">#&gt;  ctype           English_United States.utf8</span></span>
 <span><span class="co">#&gt;  tz              America/Chicago</span></span>
-<span><span class="co">#&gt;  date            2023-07-17</span></span>
+<span><span class="co">#&gt;  date            2023-07-19</span></span>
 <span><span class="co">#&gt;  pandoc          3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)</span></span>
 <span><span class="co">#&gt;  stan (rstan)    2.26.1</span></span>
 <span><span class="co">#&gt;  stan (cmdstanr) 2.32.0</span></span>
@@ -633,7 +649,6 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;    bridgesampling   1.1-2   2021-04-16 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    brms           * 2.19.0  2023-03-14 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    Brobdingnag      1.2-9   2022-10-19 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    cachem           1.0.8   2023-05-01 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    callr            3.7.3   2022-11-02 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    checkmate        2.2.0   2023-04-27 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    cli              3.6.1   2023-03-23 [1] CRAN (R 4.3.0)</span></span>
@@ -647,7 +662,6 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;    curl             5.0.1   2023-06-07 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    digest           0.6.33  2023-07-07 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    distributional   0.3.2   2023-03-22 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    downlit          0.4.3   2023-06-29 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    dplyr          * 1.1.2   2023-04-20 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    DT               0.28    2023-05-18 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    dygraphs         1.1.1.6 2018-07-11 [1] CRAN (R 4.3.0)</span></span>
@@ -684,7 +698,6 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;    MASS           * 7.3-60  2023-05-04 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    Matrix           1.6-0   2023-07-08 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    matrixStats      1.0.0   2023-06-02 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    memoise          2.0.1   2021-11-26 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    mime             0.12    2021-09-28 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    miniUI           0.1.1.1 2018-05-18 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    munsell          0.5.0   2018-06-12 [1] CRAN (R 4.3.0)</span></span>
@@ -751,7 +764,7 @@ Use contrast coding so the model parameters represent the differences between su
 
 </section><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 <ol>
-<li id="fn1"><p>I use <a href="https://rdrr.io/r/base/solve.html"><code>solve()</code></a> here for the inversion, but <a href="https://www.sciencedirect.com/science/article/pii/S0749596X19300695">Schad and colleagues (2020)</a> use the generalized inverse <a href="https://rdrr.io/pkg/MASS/man/ginv.html"><code>MASS::ginv()</code></a> or <a href="https://cran.r-project.org/web/packages/matlib/vignettes/ginv.html"><code>matlib::Ginv()</code></a>. <code><a href="https://rdrr.io/r/base/solve.html">solve()</a></code> only works on square matrices, but the generalized inverse works on non-square matrices.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>I use <code><a href="https://rdrr.io/r/base/solve.html">solve()</a></code> here for the inversion, but <a href="https://www.sciencedirect.com/science/article/pii/S0749596X19300695">Schad and colleagues (2020)</a> use the generalized inverse <code><a href="https://rdrr.io/pkg/MASS/man/ginv.html">MASS::ginv()</a></code> or <a href="https://cran.r-project.org/web/packages/matlib/vignettes/ginv.html"><code>matlib::Ginv()</code></a>. <code><a href="https://rdrr.io/r/base/solve.html">solve()</a></code> only works on square matrices, but the generalized inverse works on non-square matrices.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol></section></div></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

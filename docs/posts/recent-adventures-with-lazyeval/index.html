@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="TJ Mahr">
+<meta name="dcterms.date" content="2016-08-15">
+<title>Higher Order Functions - Recent adventures with lazyeval</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script><link rel="stylesheet" href="../../downlit-underline.css">
+</head>
+<body class="floating nav-fixed slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Higher Order Functions</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+<div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Recent adventures with lazyeval</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/tjmahr/quarto-blog/blob/main/posts/recent-adventures-with-lazyeval/index.qmd"><i class="bi"></i> Code</button></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">lazyeval</div>
+                <div class="quarto-category">rstanarm</div>
+                <div class="quarto-category">r</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>TJ Mahr </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 15, 2016</p>
+      </div>
+    </div>
+    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">July 19, 2023</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
+   
+  <ul>
+<li><a href="#capturing-expressions" id="toc-capturing-expressions" class="nav-link active" data-scroll-target="#capturing-expressions">Capturing expressions</a></li>
+  <li><a href="#asking-questions-about-a-posterior-distribution" id="toc-asking-questions-about-a-posterior-distribution" class="nav-link" data-scroll-target="#asking-questions-about-a-posterior-distribution">Asking questions about a posterior distribution</a></li>
+  </ul></nav>
+</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content"><p>The <a href="https://cran.r-project.org/web/packages/lazyeval/">lazyeval</a> package is a toolset for performing nonstandard evaluation in R. Nonstandard evaluation refers to any situation where something special happens with how user input or code is evaluated.</p>
+<p>For example, the <code><a href="https://rdrr.io/r/base/library.html">library()</a></code> function doesn’t evaluate variables. In the example below, I try to trick <code><a href="https://rdrr.io/r/base/library.html">library()</a></code> into loading a fake package called <code>evil_package</code> by assigning to the package name <code>lazyeval</code>. In other words, we have the <em>expression</em> <code>lazyeval</code> and its <em>value</em> is <code>"evil_package"</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/zpackages.html">.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "stats"     "graphics"  "grDevices" "utils"     "datasets"  "methods"  </span></span>
+<span><span class="co">#&gt; [7] "base"</span></span>
+<span></span>
+<span><span class="va">lazyeval</span> <span class="op">&lt;-</span> <span class="st">"evil_package"</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">lazyeval</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># The lazyeval package is loaded now.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/zpackages.html">.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "lazyeval"  "stats"     "graphics"  "grDevices" "utils"     "datasets" </span></span>
+<span><span class="co">#&gt; [7] "methods"   "base"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>But this gambit doesn’t work because <code><a href="https://rdrr.io/r/base/library.html">library()</a></code> did something special: It didn’t evaluate the expression <code>lazyeval</code>. In the source code of <code><a href="https://rdrr.io/r/base/library.html">library()</a></code>, there is a line <code>package &lt;- as.character(substitute(package))</code> which replaces the value of <code>package</code> with a character version of the expression that the user wrote.</p>
+<p>That’s a simple example of nonstandard evaluation, but it’s pervasive. It’s why you never have to quote column names in dplyr or ggplot2. In this post, I present some recent examples where I decided to use the lazyeval package to do something nonstandard. These examples are straight out of the <a href="https://cran.r-project.org/web/packages/lazyeval/vignettes/lazyeval.html">lazyeval vignette</a> in terms of complexity, but that’s fine. We all have to start somewhere.</p>
+<section id="capturing-expressions" class="level2 page-columns page-full"><h2 class="anchored" data-anchor-id="capturing-expressions">Capturing expressions</h2>
+<p><strong>Plot titles</strong>. While <a href="https://twitter.com/tjmahr/status/764147031170551810">reading the book</a> <a href="http://shop.oreilly.com/product/0636920018483.do"><em>Machine Learning For Hackers</em></a>, I wanted to plot random numbers generated by probability distributions discussed by the book. I used the <code><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">lazyeval::expr_text()</a></code> function to capture the command used to generate the numbers and write it as the title of the plot.</p>
+<div class="cell page-columns page-full">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plot_dist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">xs</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">xs</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html">geom_density</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span><span class="op">(</span><span class="fu">lazyeval</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">expr_text</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span><span class="op">)</span> </span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">plot_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Cauchy.html">rcauchy</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">250</span>, location <span class="op">=</span> <span class="fl">0</span>, scale <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="index_files/figure-html/plot_dist examples-1.png" class="img-fluid figure-img" alt="Examples of `plot_dist()`" width="1800"></p>
+<figcaption class="figure-caption margin-caption">Examples of <code>plot_dist()</code></figcaption></figure>
+</div>
+</div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plot_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html">rgamma</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">25000</span>, shape <span class="op">=</span> <span class="fl">5</span>, rate <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="index_files/figure-html/plot_dist examples-2.png" class="img-fluid figure-img" alt="Examples of `plot_dist()`" width="1800"></p>
+<figcaption class="figure-caption margin-caption">Examples of <code>plot_dist()</code></figcaption></figure>
+</div>
+</div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plot_dist</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html">rexp</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">25000</span>, rate <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="index_files/figure-html/plot_dist examples-3.png" class="img-fluid figure-img" alt="Examples of `plot_dist()`" width="1800"></p>
+<figcaption class="figure-caption margin-caption">Examples of <code>plot_dist()</code></figcaption></figure>
+</div>
+</div>
+</div>
+<p><strong>Less fussy warning messages</strong>. I recently inherited some code where there were custom warning messages based on the input. The code threw a warning whenever a duplicate participant ID was found in a survey. It went something like this:</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># some dummy data</span></span>
+<span><span class="va">study1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span>  id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span>, </span>
+<span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"b"</span>, <span class="st">"c"</span>, <span class="st">"a"</span>, <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">study2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span>  id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span>, </span>
+<span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"a"</span>, <span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">anyDuplicated</a></span><span class="op">(</span><span class="va">study1</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/warning.html">warning</a></span><span class="op">(</span><span class="st">"Duplicate IDs found in Study1"</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">anyDuplicated</a></span><span class="op">(</span><span class="va">study2</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/warning.html">warning</a></span><span class="op">(</span><span class="st">"Duplicate IDs found in Study2"</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co">#&gt; Warning: Duplicate IDs found in Study2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To extend this code to a new study, one would just copy-and-paste and update the <code>if</code> statement’s condition and warning messages. Like so:</p>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">study3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span>  id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>, </span>
+<span>  response <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"b"</span>, <span class="st">"c"</span>, <span class="st">"a"</span>, <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">anyDuplicated</a></span><span class="op">(</span><span class="va">study3</span><span class="op">$</span><span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/warning.html">warning</a></span><span class="op">(</span><span class="st">"Duplicate IDs found in Study2"</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="co">#&gt; Warning: Duplicate IDs found in Study2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Wait, that’s not right! I forgot to update the warning message…</p>
+<p>This setup is too brittle for me, so I abstracted the procedure into a function. First, I wrote a helper function to print out duplicates elements in a vector. This helper will let us make the warning message a little more informative.</p>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Print out duplicated elements in a vector</span></span>
+<span><span class="va">print_duplicates</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">xs</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">duplicated</span> <span class="op">&lt;-</span> <span class="va">xs</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">duplicated</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="va">duplicated</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span>collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">print_duplicates</span><span class="op">(</span><span class="va">study2</span><span class="op">$</span><span class="va">id</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "1, 2"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, I wrote a function to issue the warnings. I used <code><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">lazyeval::expr_label()</a></code> convert the user-inputted expression into a string wrapped in backticks.</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Print a warning if duplicates are found in a vector</span></span>
+<span><span class="va">warn_duplicates</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">xs</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">anyDuplicated</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="co"># Get what the user wrote for the xs argument</span></span>
+<span>    <span class="va">actual_xs</span> <span class="op">&lt;-</span> <span class="fu">lazyeval</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">expr_label</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span></span>
+<span>    <span class="va">msg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Duplicate entries in "</span>, <span class="va">actual_xs</span>, <span class="st">": "</span>, <span class="fu">print_duplicates</span><span class="op">(</span><span class="va">xs</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/warning.html">warning</a></span><span class="op">(</span><span class="va">msg</span>, call. <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/invisible.html">invisible</a></span><span class="op">(</span><span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">warn_duplicates</span><span class="op">(</span><span class="va">study1</span><span class="op">$</span><span class="va">id</span><span class="op">)</span></span>
+<span><span class="fu">warn_duplicates</span><span class="op">(</span><span class="va">study2</span><span class="op">$</span><span class="va">id</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Duplicate entries in `study2$id`: 1, 2</span></span>
+<span><span class="fu">warn_duplicates</span><span class="op">(</span><span class="va">study3</span><span class="op">$</span><span class="va">id</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Duplicate entries in `study3$id`: 2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The advantage of this approach is that the warning is a generic message that can work on any input. But in a funny way, the warning is also customized for the input because it includes the input printed verbatim.</p>
+<p>An aside: In plotting, I used <code><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">lazyeval::expr_text()</a></code>, but here I used <code><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">lazyeval::expr_label()</a></code>. The two differ slightly. Namely, <code><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">expr_label()</a></code> surrounds the captured expression with backticks to indicate that expression is code:</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">lazyeval</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">expr_text</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "stop()"</span></span>
+<span><span class="fu">lazyeval</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lazyeval/man/expr_label.html">expr_label</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "`stop()`"</span></span>
+<span></span>
+<span><span class="co"># 2021-01-05: rlang requires you to separate the quoting from the quoting</span></span>
+<span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/quo_label.html">quo_text</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substitute.html">quote</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "stop()"</span></span>
+<span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/quo_label.html">quo_label</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substitute.html">quote</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "`stop()`"</span></span>
+<span></span>
+<span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/quo_label.html">quo_text</a></span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html">quo</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "stop()"</span></span>
+<span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/quo_label.html">quo_label</a></span><span class="op">(</span><span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html">quo</a></span><span class="op">(</span><span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "`stop()`"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="asking-questions-about-a-posterior-distribution" class="level2"><h2 class="anchored" data-anchor-id="asking-questions-about-a-posterior-distribution">Asking questions about a posterior distribution</h2>
+<p>I fit regression models with RStanARM. It lets me fit Bayesian models in <a href="http://mc-stan.org/">Stan</a> by writing conventional R modeling code. (Btw, I’m <a href="http://www.meetup.com/MadR-Madison-R-Programming-UseRs-Group/events/233333897/?showDescription=true">giving a tutorial on RStanARM</a> in a month.)</p>
+<p>Here’s a model about <a href="https://en.wikipedia.org/wiki/Iris_flower_data_set">some famous flowers</a>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/rstanarm/">rstanarm</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: Rcpp</span></span>
+<span><span class="co">#&gt; Warning: package 'Rcpp' was built under R version 4.3.1</span></span>
+<span><span class="co">#&gt; This is rstanarm version 2.21.4</span></span>
+<span><span class="co">#&gt; - See https://mc-stan.org/rstanarm/articles/priors for changes to default priors!</span></span>
+<span><span class="co">#&gt; - Default priors may change, so it's safest to specify priors, even if equivalent to the defaults.</span></span>
+<span><span class="co">#&gt; - For execution on a local, multicore CPU with excess RAM we recommend calling</span></span>
+<span><span class="co">#&gt;   options(mc.cores = parallel::detectCores())</span></span>
+<span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span></span>
+<span>  <span class="va">Petal.Width</span> <span class="op">~</span> <span class="va">Petal.Length</span> <span class="op">*</span> <span class="va">Species</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">iris</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">gaussian</a></span><span class="op">(</span><span class="op">)</span>, </span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/priors.html">normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  seed <span class="op">=</span> <span class="st">"20230718"</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here’s the essential relationship being explored.</p>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Petal.Length</span>, y <span class="op">=</span> <span class="va">Petal.Width</span>, color <span class="op">=</span> <span class="va">Species</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">stat_smooth</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `geom_smooth()` using formula = 'y ~ x'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/petal width height by species-1.png" class="img-fluid" width="1800"></p>
+</div>
+</div>
+<p>The model gives me 4000 samples from the posterior distribution of the model.</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Model Info:</span></span>
+<span><span class="co">#&gt;  function:     stan_glm</span></span>
+<span><span class="co">#&gt;  family:       gaussian [identity]</span></span>
+<span><span class="co">#&gt;  formula:      Petal.Width ~ Petal.Length * Species</span></span>
+<span><span class="co">#&gt;  algorithm:    sampling</span></span>
+<span><span class="co">#&gt;  sample:       4000 (posterior sample size)</span></span>
+<span><span class="co">#&gt;  priors:       see help('prior_summary')</span></span>
+<span><span class="co">#&gt;  observations: 150</span></span>
+<span><span class="co">#&gt;  predictors:   6</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Estimates:</span></span>
+<span><span class="co">#&gt;                                  mean   sd   10%   50%   90%</span></span>
+<span><span class="co">#&gt; (Intercept)                     0.0    0.2 -0.3   0.0   0.3 </span></span>
+<span><span class="co">#&gt; Petal.Length                    0.2    0.1  0.0   0.2   0.3 </span></span>
+<span><span class="co">#&gt; Speciesversicolor              -0.1    0.3 -0.5  -0.1   0.3 </span></span>
+<span><span class="co">#&gt; Speciesvirginica                1.1    0.3  0.7   1.1   1.5 </span></span>
+<span><span class="co">#&gt; Petal.Length:Speciesversicolor  0.2    0.1  0.0   0.2   0.4 </span></span>
+<span><span class="co">#&gt; Petal.Length:Speciesvirginica   0.0    0.1 -0.2   0.0   0.2 </span></span>
+<span><span class="co">#&gt; sigma                           0.2    0.0  0.2   0.2   0.2 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Fit Diagnostics:</span></span>
+<span><span class="co">#&gt;            mean   sd   10%   50%   90%</span></span>
+<span><span class="co">#&gt; mean_PPD 1.2    0.0  1.2   1.2   1.2  </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; The mean_ppd is the sample average posterior predictive distribution of the outcome variable (for details see help('summary.stanreg')).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; MCMC diagnostics</span></span>
+<span><span class="co">#&gt;                                mcse Rhat n_eff</span></span>
+<span><span class="co">#&gt; (Intercept)                    0.0  1.0   858 </span></span>
+<span><span class="co">#&gt; Petal.Length                   0.0  1.0   862 </span></span>
+<span><span class="co">#&gt; Speciesversicolor              0.0  1.0  1147 </span></span>
+<span><span class="co">#&gt; Speciesvirginica               0.0  1.0  1165 </span></span>
+<span><span class="co">#&gt; Petal.Length:Speciesversicolor 0.0  1.0   839 </span></span>
+<span><span class="co">#&gt; Petal.Length:Speciesvirginica  0.0  1.0   829 </span></span>
+<span><span class="co">#&gt; sigma                          0.0  1.0  2756 </span></span>
+<span><span class="co">#&gt; mean_PPD                       0.0  1.0  3166 </span></span>
+<span><span class="co">#&gt; log-posterior                  0.0  1.0  1394 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; For each parameter, mcse is Monte Carlo standard error, n_eff is a crude measure of effective sample size, and Rhat is the potential scale reduction factor on split chains (at convergence Rhat=1).</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>At the 2.5% quantile, the <code>Petal.Length</code> effect looks like zero or less than zero. What proportion of the <code>Petal.Length</code> effects (for <code>setosa</code> flowers) is positive?</p>
+<p>To answer questions like this one in a convenient way, I wrote a function that takes a boolean expression about a model’s parameters and evaluates it inside of the data-frame summary of the model posterior distribution. <code><a href="https://rdrr.io/pkg/lazyeval/man/f_eval.html">lazyeval::f_eval()</a></code> does the nonstandard evaluation: It evaluates an expression captured by a formula like <code>~ 0 &lt; Petal.Length</code> inside of a list or data-frame. (Note that the mean of a logical vector is the proportion of the elements that are true.)</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Get proportion of posterior samples satisfying some inequality</span></span>
+<span><span class="va">posterior_proportion_</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">inequality</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="fu">lazyeval</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lazyeval/man/f_eval.html">f_eval</a></span><span class="op">(</span><span class="va">inequality</span>, data <span class="op">=</span> <span class="va">draws</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">posterior_proportion_</span><span class="op">(</span><span class="va">model</span>, <span class="op">~</span> <span class="fl">0</span> <span class="op">&lt;</span> <span class="va">Petal.Length</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.87675</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>But all those tildes</strong>… The final underscore in <code>posterior_proportion_()</code> follows a convention for distinguishing between nonstandard evaluation functions that require formulas and those that do not. In the dplyr package, for example, there is <code><a href="https://dplyr.tidyverse.org/reference/se-deprecated.html">select_()</a></code>/<code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code>/, <code><a href="https://dplyr.tidyverse.org/reference/se-deprecated.html">mutate_()</a></code>/<code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code>, and so on. We can do the formula-free form of this function by using <code><a href="https://rdrr.io/pkg/lazyeval/man/f_capture.html">lazyeval::f_capture()</a></code> to capture the input expression as a formula. We then hand that off to the version of the function that takes a formula.</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">posterior_proportion</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">expr</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">posterior_proportion_</span><span class="op">(</span><span class="va">model</span>, <span class="fu">lazyeval</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lazyeval/man/f_capture.html">f_capture</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">posterior_proportion</span><span class="op">(</span><span class="va">model</span>, <span class="fl">0</span> <span class="op">&lt;</span> <span class="va">Petal.Length</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.87675</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here’s another question: What proportion of the posterior of the <code>Petal.Length</code> effect for <code>virginica</code> flowers is positive? In classical models, we would change the reference level for the categorical variable, refit the model, and check the significance. But I don’t want to refit this model because that would repeat the MCMC sampling. (It takes about 30 seconds to fit this model after all!) I’ll just ask the model for the sum of <code>Petal.Length</code> and <code>Petal.Length:Speciesversicolor</code> effects. That will give me the estimated <code>Petal.Length</code> effect but adjusted for the <code>versicolor</code> species.</p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">posterior_proportion</span><span class="op">(</span><span class="va">model</span>, <span class="fl">0</span> <span class="op">&lt;</span> <span class="va">Petal.Length</span> <span class="op">+</span> <span class="va">`Petal.Length:Speciesversicolor`</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span></span>
+<span><span class="fu">posterior_proportion</span><span class="op">(</span><span class="va">model</span>, <span class="fl">0</span> <span class="op">&lt;</span> <span class="va">Petal.Length</span> <span class="op">+</span> <span class="va">`Petal.Length:Speciesvirginica`</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>(The backticks around <code>Petal.Length:Speciesversicolor</code> here prevent the <code>:</code> symbol from being evaluated as an operator.)</p>
+<hr>
+<p>Session info:</p>
+<div class="cell">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">.session_info</span></span>
+<span><span class="co">#&gt; ─ Session info ───────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt;  setting      value</span></span>
+<span><span class="co">#&gt;  version      R version 4.3.0 (2023-04-21 ucrt)</span></span>
+<span><span class="co">#&gt;  os           Windows 11 x64 (build 22621)</span></span>
+<span><span class="co">#&gt;  system       x86_64, mingw32</span></span>
+<span><span class="co">#&gt;  ui           RTerm</span></span>
+<span><span class="co">#&gt;  language     (EN)</span></span>
+<span><span class="co">#&gt;  collate      English_United States.utf8</span></span>
+<span><span class="co">#&gt;  ctype        English_United States.utf8</span></span>
+<span><span class="co">#&gt;  tz           America/Chicago</span></span>
+<span><span class="co">#&gt;  date         2023-07-19</span></span>
+<span><span class="co">#&gt;  pandoc       3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)</span></span>
+<span><span class="co">#&gt;  stan (rstan) 2.26.1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ─ Packages ───────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt;  ! package      * version  date (UTC) lib source</span></span>
+<span><span class="co">#&gt;    base64enc      0.1-3    2015-07-28 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    bayesplot      1.10.0   2022-11-16 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    boot           1.3-28.1 2022-11-22 [2] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    callr          3.7.3    2022-11-02 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    cli            3.6.1    2023-03-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    codetools      0.2-19   2023-02-01 [2] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    colorspace     2.1-0    2023-01-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    colourpicker   1.2.0    2022-10-28 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    crayon         1.5.2    2022-09-29 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    crosstalk      1.2.0    2021-11-04 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    curl           5.0.1    2023-06-07 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    digest         0.6.33   2023-07-07 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    dplyr        * 1.1.2    2023-04-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    DT             0.28     2023-05-18 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    dygraphs       1.1.1.6  2018-07-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    ellipsis       0.3.2    2021-04-29 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    evaluate       0.21     2023-05-05 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    fansi          1.0.4    2023-01-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    farver         2.1.1    2022-07-06 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    fastmap        1.1.1    2023-02-24 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    generics       0.1.3    2022-07-05 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    ggplot2      * 3.4.2    2023-04-03 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    glue           1.6.2    2022-02-24 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    gridExtra      2.3      2017-09-09 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    gtable         0.3.3    2023-03-21 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    gtools         3.9.4    2022-11-27 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    htmltools      0.5.5    2023-03-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    htmlwidgets    1.6.2    2023-03-17 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    httpuv         1.6.11   2023-05-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    igraph         1.5.0    2023-06-16 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    inline         0.3.19   2021-05-31 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    jsonlite       1.8.7    2023-06-29 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    knitr          1.43     2023-05-25 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    labeling       0.4.2    2020-10-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    later          1.3.1    2023-05-02 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    lattice        0.21-8   2023-04-05 [2] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    lazyeval     * 0.2.2    2019-03-15 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    lifecycle      1.0.3    2022-10-07 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    lme4           1.1-34   2023-07-04 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    loo            2.6.0    2023-03-31 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    magrittr       2.0.3    2022-03-30 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    markdown       1.7      2023-05-16 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    MASS           7.3-60   2023-05-04 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    Matrix         1.6-0    2023-07-08 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    matrixStats    1.0.0    2023-06-02 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    mgcv           1.9-0    2023-07-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    mime           0.12     2021-09-28 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    miniUI         0.1.1.1  2018-05-18 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    minqa          1.2.5    2022-10-19 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    munsell        0.5.0    2018-06-12 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    nlme           3.1-162  2023-01-31 [2] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    nloptr         2.0.3    2022-05-26 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    pillar         1.9.0    2023-03-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    pkgbuild       1.4.2    2023-06-26 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    pkgconfig      2.0.3    2019-09-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    plyr           1.8.8    2022-11-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    prettyunits    1.1.1    2020-01-24 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    processx       3.8.2    2023-06-30 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    promises       1.2.0.1  2021-02-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    ps             1.7.5    2023-04-18 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    R6             2.5.1    2021-08-19 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    ragg           1.2.5    2023-01-12 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    Rcpp         * 1.0.11   2023-07-06 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;  D RcppParallel   5.1.7    2023-02-27 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    reshape2       1.4.4    2020-04-09 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rlang          1.1.1    2023-04-28 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rmarkdown      2.23     2023-07-01 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rstan          2.26.22  2023-05-02 [1] local</span></span>
+<span><span class="co">#&gt;    rstanarm     * 2.21.4   2023-04-08 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rstantools     2.3.1    2023-03-30 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rstudioapi     0.15.0   2023-07-07 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    scales         1.2.1    2022-08-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    sessioninfo    1.2.2    2021-12-06 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    shiny          1.7.4.1  2023-07-06 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    shinyjs        2.1.0    2021-12-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    shinystan      2.6.0    2022-03-03 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    shinythemes    1.2.0    2021-01-25 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    StanHeaders    2.26.27  2023-06-14 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    stringi        1.7.12   2023-01-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    stringr        1.5.0    2022-12-02 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    survival       3.5-5    2023-03-12 [2] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    systemfonts    1.0.4    2022-02-11 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    textshaping    0.3.6    2021-10-13 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    threejs        0.3.3    2020-01-21 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    tibble         3.2.1    2023-03-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    tidyselect     1.2.0    2022-10-10 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    utf8           1.2.3    2023-01-31 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    V8             4.3.2    2023-06-30 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    vctrs          0.6.3    2023-06-14 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    withr          2.5.0    2022-03-03 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    xfun           0.39     2023-04-20 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    xtable         1.8-4    2019-04-21 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    xts            0.13.1   2023-04-16 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    yaml           2.3.7    2023-01-23 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    zoo            1.8-12   2023-04-13 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  [1] C:/Users/Tristan/AppData/Local/R/win-library/4.3</span></span>
+<span><span class="co">#&gt;  [2] C:/Program Files/R/R-4.3.0/library</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;  D ── DLL MD5 mismatch, broken installation.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ──────────────────────────────────────────────────────────────────────────────</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

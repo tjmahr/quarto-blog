@@ -8,6 +8,8 @@ tags:
 date: '2023-07-03'
 date-modified: '`r format(Sys.Date())`'
 description: But mostly how contrast matrices are computed
+aliases: 
+  - "/bayesian-ordering-constraint/"
 title-block-banner: 2023-07-ruins-1280.jpg
 image: 2023-07-ruins-1280.jpg
 ..header:

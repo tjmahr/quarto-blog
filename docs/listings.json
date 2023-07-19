@@ -3,7 +3,8 @@
     "listing": "/index.html",
     "items": [
       "/posts/bayesian-ordering-constraint/index.html",
-      "/posts/welcome/index.html",
+      "/posts/migrating-from-jekyll-to-quarto/index.html",
+      "/posts/recent-adventures-with-lazyeval/index.html",
       "/posts/confusion-matrix-late-talkers/index.html"
     ]
   }

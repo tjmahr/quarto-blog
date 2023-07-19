@@ -89,9 +89,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit"
   }
-}</script><link rel="stylesheet" href="../../styles.css">
+}</script><link rel="stylesheet" href="../../downlit-underline.css">
 </head>
-<body class="nav-fixed fullcontent">
+<body class="floating nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
@@ -125,7 +125,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
-    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full"><div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <div class="quarto-title-block"><div><h1 class="title">Confusion matrix statistics on late talker diagnoses</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/tjmahr/quarto-blog/blob/main/posts/confusion-matrix-late-talkers/index.qmd"><i class="bi"></i> Code</button></div></div>
                   <div>
@@ -169,8 +169,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
+   
+  <ul>
+<li><a href="#confusion-matrix-measures-in-r" id="toc-confusion-matrix-measures-in-r" class="nav-link active" data-scroll-target="#confusion-matrix-measures-in-r">Confusion Matrix Measures in R</a></li>
+  </ul></nav>
+</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content"><p>How many late talkers are just <em>late bloomers</em>? More precisely, how many children identified as late talkers at 18 months catch up to the normal range by one year later? This is an important question. From a clinical perspective, we want to support children with language delays, but it is also inefficient to spend resources fixing a self-correcting problem.</p>
 <p><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3266972/">Fernald and Marchman (2012)</a> touch on this question. Children falling below the 20<sup>th</sup> percentile in vocabulary score at 18 months were labeled “late talkers”. These children, along with a control group of timely-talkers, participated in an eyetracking study at 18 months and had their vocabulary measured every 3 months until 30 months of age.</p>
@@ -216,6 +223,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>What we have looks like a real data-set now.</p>
+<div class="cell" data-fig.asp="0.618">
+
+</div>
 <div class="cell" data-fig.asp="0.618">
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">all_kids</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html">sample_n</a></span><span class="op">(</span><span class="fl">8</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
@@ -263,6 +273,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;                                           </span></span>
 <span><span class="co">#&gt;        'Positive' Class : WNL at 30m      </span></span>
 <span><span class="co">#&gt; </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-fig.asp="0.618">
+
 </div>
 <p>Here, we can confirm the positive predictive value (true positives / positive calls)<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> is 14/36 = 0.913. The negative predictive value is noteworthy; most children not diagnosed as late talkers did not show a delay one year later (NPV = 42/46 = 0.3889).</p>
 <hr>
