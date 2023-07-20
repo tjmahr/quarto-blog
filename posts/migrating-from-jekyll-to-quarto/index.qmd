@@ -10,15 +10,9 @@ This is the **not** first post in a Quarto blog. Welcome!
 
 ![](thumbnail.jpg)
 
-Since this post doesn't specify an explicit `image`, the first image in the post will be used in the listing page of posts. 
+- [ ] I want a banner image on top like the old site with a credit to the source.
 
-Okay!
-
-***
-
-I want a banner image on top like the old site with a credit to the source.
-
-I had to put `fig-width: 8` under `format > html` in `_quarto.yml`. I also pushed other knitr options here: 
+- [x] I had to put `fig-width: 8` under `format > html` in `_quarto.yml`. I also pushed other knitr options here: 
 
 ```
     fig-asp: 0.618
@@ -27,6 +21,10 @@ I had to put `fig-width: 8` under `format > html` in `_quarto.yml`. I also pushe
     fig-cap-location: "margin"
 ```
 
+- [ ] I am not sure how to replicate the `out.width` knitr option.
+- [ ] I want to use targets instead of freeze.
+- [ ] I need old URLs to redirect.
+
 I got to opt into `fig-cap-location: "margin"`.
 
 I had to remove the old knitr _cached stuff. Still need a different solution.
@@ -34,11 +32,12 @@ I had to remove the old knitr _cached stuff. Still need a different solution.
 I don't want the green links. If I set the link color, that still leaves the green 
 link color in the table of contents.
 
-All of my old manual downlit attempts are styled differently than actual downlit urls.
 
-I want a slightly larger font size.
+- [ ] I want a slightly larger font size. Set `fontsize: 1.1em` in _quarto.yml
 
-I want underlined downlit links.
+- [x] All of my old manual downlit attempts are styled differently than actual downlit urls. Added a check.
+
+- [x] I want underlined downlit links. Done by adding a new css file.
 
 I have to convert fig.alt and fig.cap to here.
 
