@@ -1,12 +1,25 @@
+#' Import a Jekyll blog post
+#' @param url_raw the full url to a raw .Rmd file
+#' @param overwrite whether to overwrite an existing `index.qmd` file. Defaults
+#'   to `FALSE`. When migrating a post, we may need to hand-fix some issues in
+#'   the `index.qmd`. We don't want to overwrite these changes on accident.
+#' @return a list containing the contents of the original post, the modified
+#'   post, and metadata about the post.
 import_jekyll_post <- function(url_raw, overwrite = FALSE) {
   file <- file.path(tempdir(), basename(url_raw))
   download_result <- download.file(url_raw, file, quiet = TRUE)
 
   data_file <- read_post_data(file)
 
-  dir.create(data_file$path_post_dir, showWarnings = FALSE)
   if (dir.exists(data_file$path_post_dir)) {
-    cli::cli_alert_success("Created {.path {data_file$path_post_dir}}")
+    cli::cli_alert_info(
+      "Post folder already exists {.path {data_file$path_post_dir}}"
+    )
+  } else {
+    dir.create(data_file$path_post_dir, showWarnings = FALSE)
+    cli::cli_alert_success(
+      "Post folder created {.path {data_file$path_post_dir}}"
+    )
   }
 
   data_file <- data_file |>
@@ -23,22 +36,22 @@ import_jekyll_post <- function(url_raw, overwrite = FALSE) {
 
   if (!overwrite & file.exists(data_file$path_post)) {
     cli::cli_warn(c(
-      "!" = "{.path {data_file$path_post}} already exists.",
-      "*" = "Set {.arg  overwrite = TRUE} to replace files "
+      "!" = "Post file already exists {.path {data_file$path_post}}",
+      "*" = "Set {.arg  overwrite = TRUE} to replace files"
     ))
   } else {
-    readr::write_lines(data_file$lines_migrated, data_file$path_post)
-    cli::cli_alert_success("Created {.path {data_file$path_post}}")
+    brio::write_lines(data_file$lines_migrated, data_file$path_post)
+    cli::cli_alert_success("Post file created {.path {data_file$path_post}}")
   }
 
-  data_file$lines_current <- readr::read_lines(data_file$path_post)
+  data_file$lines_current <- brio::read_lines(data_file$path_post)
   invisible(data_file)
 }
 
-
+#' @param file path to a file to read in
 read_post_data <- function(file) {
   # Check the file for a weird number of YAML delimiters
-  lines <- readr::read_lines(file)
+  lines <- brio::read_lines(file)
   lines_yaml <- lines |>
     stringr::str_which("^[.-]{3}$")
 
@@ -102,7 +115,7 @@ migrate_yaml_data <- function(data_file) {
 convert_list_to_yaml_lines <- function(data) {
   file_yaml <- tempfile(fileext = ".yaml")
   yaml::write_yaml(data, file_yaml)
-  readr::read_lines(file_yaml)
+  brio::read_lines(file_yaml)
 }
 
 # Miscellaneous fixes
