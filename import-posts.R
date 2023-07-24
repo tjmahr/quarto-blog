@@ -88,7 +88,7 @@ read_post_data <- function(file) {
     lines = lines,
     lines_body = lines_body,
     data_yaml = data_yaml,
-    path_post_dir = file.path("posts", slug),
+    path_post_dir = file.path("posts", tools::file_path_sans_ext(basename)),
     path_post = file.path(path_post_dir, "index.qmd")
   )
 }
@@ -108,6 +108,7 @@ migrate_yaml_data <- function(data_file) {
   d$categories <- NULL
   d$header <- NULL
 
+  d$aliases <- list(paste0("/", data_file$slug, "/"))
   data_file$data_yaml_migrated <- d
   data_file
 }
@@ -125,6 +126,17 @@ patch_body_lines <- function(data_file) {
   # Replace old footer stuff
   ind_footer_child <- l |>
     stringr::str_which("child = \"_R/_footer.Rmd\"")
+
+  if (length(ind_footer_child) == 0) {
+    cli::cli_warn(c(
+      "Could not find {.code child = \"_R/_footer.Rmd\"} chunk to replace.",
+      "*" = "Manually remove existing footer in file."
+    ))
+
+    data_file$lines_body <- c(l, "", c("{{< include ../_footer.Rmd >}}", ""))
+    return(data_file)
+  }
+
   l[c(ind_footer_child, ind_footer_child + 1)] <-
     c("{{< include ../_footer.Rmd >}}", "")
 
@@ -218,6 +230,15 @@ check_post <- function(lines) {
 
 
 url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2023-07-03-bayesian-ordering-constraint.Rmd"
+url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2016-08-15-recent-adventures-with-lazyeval.Rmd"
+url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2015-10-06-confusion-matrix-late-talkers.Rmd"
 
 d <- import_jekyll_post(url_raw)
-check_post(d$lines)
+check_post(d$lines_current)
+usethis::edit_file(d$path_post)
+
+
+
+d$data_yaml
+d$data_yaml_migrated
+d$lines_migrated |> head(20)

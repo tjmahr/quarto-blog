@@ -1,13 +1,16 @@
 ---
-title: "Recent adventures with lazyeval"
-excerpt: "Some basic uses of nonstandard evaluation."
-date-modified: "`r format(Sys.Date())`"
-date: 2016-08-15
-categories:
-  - lazyeval
-  - rstanarm
-  - r
+title: Recent adventures with lazyeval
+tags:
+- lazyeval
+- rstanarm
+- r
+date: '2016-08-15'
+date-modified: '`r format(Sys.Date())`'
+description: Some basic uses of nonstandard evaluation.
+aliases:
+- /recent-adventures-with-lazyeval/
 ---
+
 
 The [lazyeval](https://cran.r-project.org/web/packages/lazyeval/) package is a
 toolset for performing nonstandard evaluation in R. Nonstandard evaluation

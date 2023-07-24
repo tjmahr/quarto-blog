@@ -2,10 +2,10 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/bayesian-ordering-constraint/index.html",
+      "/posts/2023-07-03-bayesian-ordering-constraint/index.html",
       "/posts/migrating-from-jekyll-to-quarto/index.html",
-      "/posts/recent-adventures-with-lazyeval/index.html",
-      "/posts/confusion-matrix-late-talkers/index.html"
+      "/posts/2016-08-15-recent-adventures-with-lazyeval/index.html",
+      "/posts/2015-10-06-confusion-matrix-late-talkers/index.html"
     ]
   }
 ]

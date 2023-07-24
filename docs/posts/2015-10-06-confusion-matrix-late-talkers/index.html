@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="TJ Mahr">
 <meta name="dcterms.date" content="2015-10-06">
-<meta name="description" content="Positive predictive values and the like.">
+<meta name="description" content="Posterior predictive values and the like.">
 <title>my experimental quarto blog - Confusion matrix statistics on late talker diagnoses</title>
 <style>
 code{white-space: pre-wrap;}
@@ -127,17 +127,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </div> <!-- /container-fluid -->
     </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full"><div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <div class="quarto-title-block"><div><h1 class="title">Confusion matrix statistics on late talker diagnoses</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/tjmahr/quarto-blog/blob/main/posts/confusion-matrix-late-talkers/index.qmd"><i class="bi"></i> Code</button></div></div>
+      <div class="quarto-title-block"><div><h1 class="title">Confusion matrix statistics on late talker diagnoses</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/tjmahr/quarto-blog/blob/main/posts/2015-10-06-confusion-matrix-late-talkers/index.qmd"><i class="bi"></i> Code</button></div></div>
                   <div>
         <div class="description">
-          Positive predictive values and the like.
+          Posterior predictive values and the like.
         </div>
       </div>
-                          <div class="quarto-categories">
-                <div class="quarto-category">r</div>
-                <div class="quarto-category">caret</div>
-              </div>
-                  </div>
+                </div>
   </div>
     
   
@@ -160,7 +156,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">July 14, 2023</p>
+        <p class="date-modified">July 24, 2023</p>
       </div>
     </div>
       
@@ -186,7 +182,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="confusion-matrix-measures-in-r" class="level2"><h2 class="anchored" data-anchor-id="confusion-matrix-measures-in-r">Confusion Matrix Measures in R</h2>
 <p>I would like to report similar classification quantities in my own analyses, so I figured out how to reproduce their results in R. And it’s as simple as calling the <code><a href="https://rdrr.io/pkg/caret/man/confusionMatrix.html">caret::confusionMatrix()</a></code> function in the caret package.</p>
 <p>First, let’s re-create their data. We’ll make a long dataframe with one row per child reported in the study. We will have fields for each child’s initial <code>Group</code> (late talking or within-normal-limits at 18 months), their <code>Predicted</code> group (assuming late-talking children remain delayed), and the observed <code>Outcome</code>.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># LT: late talking</span></span>
@@ -202,13 +198,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="va">wnl_delayed</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
 <span></span>
 <span><span class="co"># Reproduce their data-set (one row per reported child)</span></span>
-<span><span class="va">wnl_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span><span class="va">wnl_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tibble/man/tibble.html">tibble</a></span><span class="op">(</span></span>
 <span>  Group <span class="op">=</span> <span class="va">groups</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
 <span>  Predicted <span class="op">=</span> <span class="va">outcomes</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
 <span>  Outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">outcomes</span>, times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">wnl_still_wnl</span>, <span class="va">wnl_delayed</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">lt_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span><span class="va">lt_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tibble/man/tibble.html">tibble</a></span><span class="op">(</span></span>
 <span>  Group <span class="op">=</span> <span class="st">"LT at 18m"</span>,</span>
 <span>  Outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">outcomes</span>, times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">lt_bloomed</span>, <span class="va">lt_still_delayed</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  Predicted <span class="op">=</span> <span class="va">outcomes</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span>
@@ -223,10 +219,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>What we have looks like a real data-set now.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 
 </div>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">all_kids</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/sample_n.html">sample_n</a></span><span class="op">(</span><span class="fl">8</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">Group</span>, <span class="va">Predicted</span>, <span class="va">Outcome</span><span class="op">)</span></span>
@@ -243,7 +239,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; 8      27 WNL at 18m WNL at 30m     WNL at 30m</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Next, we just call <code><a href="https://rdrr.io/pkg/caret/man/confusionMatrix.html">caret::confusionMatrix()</a></code> on the predicted values and the reference values.</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">conf_mat</span> <span class="op">&lt;-</span> <span class="fu">caret</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/caret/man/confusionMatrix.html">confusionMatrix</a></span><span class="op">(</span><span class="va">all_kids</span><span class="op">$</span><span class="va">Predicted</span>, <span class="va">all_kids</span><span class="op">$</span><span class="va">Outcome</span><span class="op">)</span></span>
 <span><span class="va">conf_mat</span></span>
 <span><span class="co">#&gt; Confusion Matrix and Statistics</span></span>
@@ -274,13 +270,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;        'Positive' Class : WNL at 30m      </span></span>
 <span><span class="co">#&gt; </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 
 </div>
 <p>Here, we can confirm the positive predictive value (true positives / positive calls)<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> is 14/36 = 0.913. The negative predictive value is noteworthy; most children not diagnosed as late talkers did not show a delay one year later (NPV = 42/46 = 0.3889).</p>
 <hr>
 <p>Session info:</p>
-<div class="cell" data-fig.asp="0.618">
+<div class="cell">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">.session_info</span></span>
 <span><span class="co">#&gt; ─ Session info ───────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;  setting  value</span></span>
@@ -292,7 +288,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt;  collate  English_United States.utf8</span></span>
 <span><span class="co">#&gt;  ctype    English_United States.utf8</span></span>
 <span><span class="co">#&gt;  tz       America/Chicago</span></span>
-<span><span class="co">#&gt;  date     2023-07-14</span></span>
+<span><span class="co">#&gt;  date     2023-07-24</span></span>
 <span><span class="co">#&gt;  pandoc   3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Packages ───────────────────────────────────────────────────────────────────</span></span>

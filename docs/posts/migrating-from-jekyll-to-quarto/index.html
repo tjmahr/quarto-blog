@@ -165,21 +165,27 @@ ul.task-list li input[type="checkbox"] {
 
 <p>This is the <strong>not</strong> first post in a Quarto blog. Welcome!</p>
 <p><img src="thumbnail.jpg" class="img-fluid"></p>
-<p>Since this post doesn’t specify an explicit <code>image</code>, the first image in the post will be used in the listing page of posts.</p>
-<p>Okay!</p>
-<hr>
-<p>I want a banner image on top like the old site with a credit to the source.</p>
-<p>I had to put <code>fig-width: 8</code> under <code>format &gt; html</code> in <code>_quarto.yml</code>. I also pushed other knitr options here:</p>
+<ul class="task-list">
+<li><p><input type="checkbox">I want a banner image on top like the old site with a credit to the source.</p></li>
+<li><p><input type="checkbox" checked="">I had to put <code>fig-width: 8</code> under <code>format &gt; html</code> in <code>_quarto.yml</code>. I also pushed other knitr options here:</p></li>
+</ul>
 <pre><code>    fig-asp: 0.618
     fig-dpi: 300
     fig-align: "center"
     fig-cap-location: "margin"</code></pre>
+<ul class="task-list">
+<li><input type="checkbox">I am not sure how to replicate the <code>out.width</code> knitr option.</li>
+<li><input type="checkbox">I want to use targets instead of freeze.</li>
+<li><input type="checkbox">I need old URLs to redirect.</li>
+</ul>
 <p>I got to opt into <code>fig-cap-location: "margin"</code>.</p>
 <p>I had to remove the old knitr _cached stuff. Still need a different solution.</p>
 <p>I don’t want the green links. If I set the link color, that still leaves the green link color in the table of contents.</p>
-<p>All of my old manual downlit attempts are styled differently than actual downlit urls.</p>
-<p>I want a slightly larger font size.</p>
-<p>I want underlined downlit links.</p>
+<ul class="task-list">
+<li><p><input type="checkbox">I want a slightly larger font size. Set <code>fontsize: 1.1em</code> in _quarto.yml</p></li>
+<li><p><input type="checkbox" checked="">All of my old manual downlit attempts are styled differently than actual downlit urls. Added a check.</p></li>
+<li><p><input type="checkbox" checked="">I want underlined downlit links. Done by adding a new css file.</p></li>
+</ul>
 <p>I have to convert fig.alt and fig.cap to here.</p>
 <pre><code>#| fig-alt: "Examples of `plot_dist()`"
 #| fig-cap:</code></pre>
