@@ -177,7 +177,7 @@ migrate_assets <- function(data_file, base_url = "https://raw.githubusercontent.
 
 
 check_post <- function(lines) {
-  create_regex_checker <- function(pattern, message) {
+  create_regex_checker <- function(pattern, message, tip = character(0)) {
     function(xs) {
       pattern_main <- pattern
       pattern_preview <- paste0(".{0,30}(", pattern_main, ").{0,30}")
@@ -192,8 +192,9 @@ check_post <- function(lines) {
           .close = ">>>"
         )
         cli::cli_warn(c(
-          "{message}",
-          cli::format_bullets_raw(l)
+          message,
+          cli::format_bullets_raw(l),
+          tip
         ))
       }
       invisible(any_found)
@@ -212,11 +213,22 @@ check_post <- function(lines) {
     "\\[`\\w+",
     "Manually linked code found:"
   )
+  check_github_emoji <- create_regex_checker(
+    "(\\b|\\s):\\w+:(\\b|\\s)",
+    "GitHub emoji found",
+    tip = c("i" = "Cheatsheet: {.url https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md}")
+  )
+  check_emo_ji <- create_regex_checker(
+    "`r emo::ji",
+    "`emo::ji()` found:"
+  )
 
   result <- any(
     check_assets(lines),
     check_jekyll(lines),
-    check_codelinks(lines)
+    check_codelinks(lines),
+    check_github_emoji(lines),
+    check_emo_ji(lines)
   )
   invisible(result)
 }
@@ -224,20 +236,44 @@ check_post <- function(lines) {
 
 
 
+slugs <- fs::path_home_r() |>
+  fs::path("GitRepos/tjmahr.github.io/_R") |>
+  fs::dir_ls(regexp = "\\d{4}") |>
+  basename()
 
+urls <- file.path("https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R", slugs)
 
-
-
-
-url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2023-07-03-bayesian-ordering-constraint.Rmd"
+url_raw <- sample(urls, size = 1)
+d <- import_jekyll_post(url_raw)
+check_post(d$lines_current)
 url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2016-08-15-recent-adventures-with-lazyeval.Rmd"
+d <- import_jekyll_post(url_raw)
+check_post(d$lines_current)
 url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2015-10-06-confusion-matrix-late-talkers.Rmd"
+d <- import_jekyll_post(url_raw)
+check_post(d$lines_current)
+url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2017-08-15-set-na-where-nonstandard-evaluation-use-case.Rmd"
+d <- import_jekyll_post(url_raw)
+check_post(d$lines_current)
+
+
 
 d <- import_jekyll_post(url_raw)
 check_post(d$lines_current)
 usethis::edit_file(d$path_post)
 
 
+
+current_posts <- fs::dir_ls("posts", glob = "*index.qmd", recurse = TRUE)
+
+
+for (post in current_posts) {
+  withr::with_options(list(warn = 1), {
+    cli::cli_inform("{.strong {post}}")
+    check_post(brio::read_lines(post))
+  })
+
+}
 
 d$data_yaml
 d$data_yaml_migrated
