@@ -1,0 +1,17 @@
+.quarto-title-block .quarto-title-banner {
+  background-position-x: 50%;
+  background-position-y: 50%;
+  background-blend-mode: overlay;
+  background-color: rgba(10, 10, 10, .5);
+  color: rgb(255, 255, 255);
+}
+
+.quarto-title-block .quarto-title-banner .title-block-caption {
+  font-size: .75em;
+  color: rgba(255,255,255,.7);
+}
+
+.quarto-title-block .quarto-title-banner .title-block-caption a {
+  text-decoration: underline !important;
+  color: rgba(255,255,255,.7);
+}

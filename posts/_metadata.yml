@@ -24,3 +24,7 @@ knitr:
     dev: "ragg_png"
     out-width: "80%"
 
+format:
+  html:
+    template-partials:
+      - partials/title-block.html

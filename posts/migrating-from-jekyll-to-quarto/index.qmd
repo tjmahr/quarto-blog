@@ -171,7 +171,187 @@ To migrate a single post, we need to do the following steps:
 
 
 
+
+## post headers
+
+On the Jekyll site, I could include a banner image, a caption for the
+banner image, and a color overlay for the image using YAML metadata:
+
+```{yaml}
+header:
+  overlay_image: assets/images/2022-03-neon.jpg
+  image_description: A neon sign that says 'neon'
+  overlay_filter: rgba(10, 10, 10, 0.5)
+  caption: 'Photo credit: [**Slava Kuzminsk**](https://unsplash.com/photos/qnHOFl4VuFc)'
+```
+
+Here is the result:
+
+:::{.column-body-outset}
+![](jekyll-post-header-example.png){fig-alt="A header on the Jekyll site. It is a neon sign of the word 'neon'."}
+:::
+
+
+The post featured here is about ggplot2 plots that contain their own
+source code in the title, so the background image of a neon sign of the
+word "neon" is a thematic gag. 
+
+We can get a banner image in Quarto using the YAML front matter:
+
+```{yaml}
+title-block-banner: 2022-03-neon.jpg
+image: 2022-03-neon.jpg
+```
+
+where `image` set the image that accompanies the post on the list of
+blog posts.
+
+Here is the result:
+
+:::{.column-body-outset}
+![](quarto-post-header.png){fig-alt="A header on the default Quarto site. We cannot see the word 'neon'."}
+:::
+
+Note that we cannot see the word "neon" and the title is hard to read
+without the overlaid color on the image. We can fix these issues by
+using CSS to create a color background that blends with the image and
+centering the background image. I also set the font-color to be white
+for added contrast. In Jekyll, we could customize the color layer for
+each post, but we do not have that ability here. We store this custom
+css in `title-block.css` and tell `_quarto.yaml` about it.
+
+
+```{css, filename = "title-block.css"}
+.quarto-title-block .quarto-title-banner {
+  background-position-x: 50%;
+  background-position-y: 50%;
+  background-blend-mode: overlay;
+  background-color: rgba(10, 10, 10, .5);
+  color: rgb(255, 255, 255);
+}
+```
+
+```{yaml, filename = "_quarto.yml"}
+# (the key portion of the file)
+format:
+  html:
+    css:
+      - title-block.css
+```
+
+<!-- This addition to the  -->
+
+We still have a major problem at this point: We cannot use these banner
+images without including the photo credit credit. Fortunately, we can
+patch this title banner by using a [template
+partial](https://quarto.org/docs/journals/templates.html#template-partials).
+Quarto documents like these blog posts are built by plugging data into
+an HTML template, and this template is itself templated (these
+subtemplates are the partials). That means, we can change just the title
+banner template and keep the other parts in tact.
+
+First, let's make the photo caption into a structured piece of metadata in the
+YAML front matter. This step will create pieces of data the template can see:
+
+```{yaml, filename = "yaml front matter"}
+# (the key portion of the file)
+title-block-banner-caption: 
+  credit: Slava Kuzminsk
+  link: https://unsplash.com/photos/qnHOFl4VuFc
+```
+
+We download the HTML title banner template [from
+GitHub](https://github.com/quarto-dev/quarto-cli/blob/main/src/resources/formats/html/templates/banner/title-block.html)
+and store it in `partials/title-block.html`. We then modify the file, adding the 5 unindented lines towards the bottom.
+```{html, filename = "partials/title-block.html"}
+<header id="title-block-header" class="quarto-title-block default$if(quarto-template-params.banner-header-class)$ $quarto-template-params.banner-header-class$$endif$">
+  <div class="quarto-title-banner">
+    <div class="quarto-title column-body">
+      <h1 class="title">$title$</h1>
+      $if(subtitle)$
+      <p class="subtitle lead">$subtitle$</p>
+      $endif$
+      $if(description)$
+      <div>
+        <div class="description">
+          $description$
+        </div>
+      </div>
+      $endif$
+      $if(categories)$
+        $if(quarto-template-params.title-block-categories)$
+      <div class="quarto-categories">
+        $for(categories)$
+        <div class="quarto-category">$categories$</div>
+        $endfor$
+      </div>
+        $endif$
+      $endif$
+    </div>
+
+$if(title-block-banner-caption)$
+<div class = "title-block-caption">
+Photo credit: <a href="$title-block-banner-caption.link$">$title-block-banner-caption.credit$</a>
+</div>
+$endif$
+  
+  </div>
+  $title-metadata.html()$
+</header>
+```
+
+In Pandoc's templating language, we can refer to YAML front matter
+variables by using dollar signs. For example, `$title$` inserts the
+title, and `$title-block-banner-caption.link$` inserts the `link`
+property of the `title-block-banner-caption` property. In the added
+lines, we check for a `title-block-banner-caption` and then add a
+`<div>` with a link to the photo source.
+
+To activate this partial template, we have to add a field to `_quarto.yml`:
+
+```{yaml, filename = "_quarto.yml"}
+# (the key portion of the file)
+format:
+  html:
+    template-partials:
+      - partials/title-block.html
+```
+
+We need this addition to the title block to look okay, so we amend
+`title-block.css`:
+
+```{css, filename = "title-block.css"}
+.quarto-title-block .quarto-title-banner {
+  background-position-x: 50%;
+  background-position-y: 50%;
+  background-blend-mode: overlay;
+  background-color: rgba(10, 10, 10, .5);
+  color: rgb(255, 255, 255);
+}
+
+.quarto-title-block .quarto-title-banner .title-block-caption {
+  font-size: .75em;
+  color: rgba(255,255,255,.7);
+}
+
+.quarto-title-block .quarto-title-banner .title-block-caption a {
+  text-decoration: underline !important;
+  color: rgba(255,255,255,.7);
+}
+```
+
+At last, we have a decent looking title banner with a background image
+and a photo credit.
+
+:::{.column-body-outset}
+![](quarto-post-header-fixed.png){fig-alt="A header on the default Quarto site. We can see the word 'neon' and a link to the source of the photo."}
+:::
+
+
 ## other notes
+
+
+### listings
 
 ### downlit links
 
@@ -198,7 +378,7 @@ is something I had copy-pasted for use in my rmarkdown notebooks, and I
 have forgetten where I originally found it. I have included it as a
 comment.
 
-```css
+```{css, filename = "downlit-underline.css"}
 code a:any-link {
   color: inherit; /* use colour from syntax highlighting */
   text-decoration: underline;
@@ -206,7 +386,8 @@ code a:any-link {
 }
 ```
 
-```yaml
+```{yaml, filename = "_quarto.yml"}
+# (the key portion of the file)
 format:
   html:
     css:

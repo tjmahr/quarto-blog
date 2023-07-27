@@ -18,6 +18,7 @@ format:
     theme: sandstone
     css:
       - downlit-underline.css
+      - title-block.css
     fig-width: 6
     fig-asp: 0.618
     fig-dpi: 300
@@ -27,6 +28,8 @@ format:
     # linkcolor: "#f5333b"
     fontsize: 1.1em
     linestretch: 1.5
+    template-partials:
+      - partials/title-block.html
 
 # highlight-style
 # syntax-definitions

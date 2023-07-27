@@ -9,7 +9,8 @@ listing:
   filter-ui: false
   fields: [image, date, title, subtitle, description]
 page-layout: full
-title-block-banner: false
+title-block-banner: "white"
+# title-block-style: plain
 ---
 
 ::: {.callout-caution}

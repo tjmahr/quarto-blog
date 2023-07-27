@@ -44,6 +44,19 @@ import_jekyll_post <- function(url_raw, overwrite = FALSE) {
     cli::cli_alert_success("Post file created {.path {data_file$path_post}}")
   }
 
+  if (overwrite) {
+    knitr::convert_chunk_header(
+      input = data_file$path_post,
+      output = identity,
+      type = "yaml",
+      width = 60
+    )
+    cli::cli_alert_success(
+      "Converted in-header chunk options to in-body options"
+    )
+  }
+
+
   data_file$lines_current <- brio::read_lines(data_file$path_post)
   invisible(data_file)
 }
@@ -103,7 +116,7 @@ migrate_yaml_data <- function(data_file) {
   # Renamed fields
   d$description <- d$excerpt
   d$categories <- d$tags
-  d$..header <- d$header
+  d$image_header <- d$header
   d$excerpt <- NULL
   d$categories <- NULL
   d$header <- NULL
@@ -222,6 +235,10 @@ check_post <- function(lines) {
     "`r emo::ji",
     "`emo::ji()` found:"
   )
+  check_magrittr <- create_regex_checker(
+    "(library.magrittr.)|(%>%)",
+    "`emo::ji()` found:"
+  )
 
   result <- any(
     check_assets(lines),
@@ -246,6 +263,10 @@ urls <- file.path("https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/mas
 url_raw <- sample(urls, size = 1)
 d <- import_jekyll_post(url_raw)
 check_post(d$lines_current)
+
+
+
+
 url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2016-08-15-recent-adventures-with-lazyeval.Rmd"
 d <- import_jekyll_post(url_raw)
 check_post(d$lines_current)
@@ -260,7 +281,7 @@ check_post(d$lines_current)
 
 d <- import_jekyll_post(url_raw)
 check_post(d$lines_current)
-usethis::edit_file(d$path_post)
+# usethis::edit_file(d$path_post)
 
 
 

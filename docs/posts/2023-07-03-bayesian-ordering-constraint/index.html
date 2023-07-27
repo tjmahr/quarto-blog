@@ -97,6 +97,7 @@ background-size: cover;
       }
 </style>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><link rel="stylesheet" href="../../downlit-underline.css">
+<link rel="stylesheet" href="../../title-block.css">
 </head>
 <body class="floating nav-fixed slimcontent">
 
@@ -141,8 +142,8 @@ background-size: cover;
         </div>
       </div>
                 </div>
-  </div>
-    
+          </div>
+
   
   <div class="quarto-title-meta">
 
@@ -163,13 +164,13 @@ background-size: cover;
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">July 25, 2023</p>
+        <p class="date-modified">July 27, 2023</p>
       </div>
     </div>
       
     </div>
     
-  
+
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
@@ -627,7 +628,7 @@ Use contrast coding so the model parameters represent the differences between su
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">.session_info</span></span>
 <span><span class="co">#&gt; ─ Session info ───────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;  setting         value</span></span>
-<span><span class="co">#&gt;  version         R version 4.3.1 (2023-06-16 ucrt)</span></span>
+<span><span class="co">#&gt;  version         R version 4.3.0 (2023-04-21 ucrt)</span></span>
 <span><span class="co">#&gt;  os              Windows 11 x64 (build 22621)</span></span>
 <span><span class="co">#&gt;  system          x86_64, mingw32</span></span>
 <span><span class="co">#&gt;  ui              RTerm</span></span>
@@ -635,10 +636,10 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;  collate         English_United States.utf8</span></span>
 <span><span class="co">#&gt;  ctype           English_United States.utf8</span></span>
 <span><span class="co">#&gt;  tz              America/Chicago</span></span>
-<span><span class="co">#&gt;  date            2023-07-25</span></span>
+<span><span class="co">#&gt;  date            2023-07-27</span></span>
 <span><span class="co">#&gt;  pandoc          3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)</span></span>
-<span><span class="co">#&gt;  stan (rstan)    2.21.0</span></span>
-<span><span class="co">#&gt;  stan (cmdstanr) 2.32.2</span></span>
+<span><span class="co">#&gt;  stan (rstan)    2.26.1</span></span>
+<span><span class="co">#&gt;  stan (cmdstanr) 2.32.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ─ Packages ───────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;  ! package        * version date (UTC) lib source</span></span>
@@ -652,19 +653,22 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;    callr            3.7.3   2022-11-02 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    checkmate        2.2.0   2023-04-27 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    cli              3.6.1   2023-03-23 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    cmdstanr         0.5.3   2023-04-25 [1] local</span></span>
+<span><span class="co">#&gt;    cmdstanr         0.5.3   2023-04-24 [1] github (stan-dev/cmdstanr)</span></span>
 <span><span class="co">#&gt;    coda             0.19-4  2020-09-30 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    codetools        0.2-19  2023-02-01 [2] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    codetools        0.2-19  2023-02-01 [2] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    colorspace       2.1-0   2023-01-23 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    colourpicker     1.2.0   2022-10-28 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    crayon           1.5.2   2022-09-29 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    crosstalk        1.2.0   2021-11-04 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    digest           0.6.32  2023-06-26 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    curl             5.0.1   2023-06-07 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    digest           0.6.33  2023-07-07 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    distributional   0.3.2   2023-03-22 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    dplyr          * 1.1.2   2023-04-20 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    DT               0.28    2023-05-18 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    dygraphs         1.1.1.6 2018-07-11 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    ellipsis         0.3.2   2021-04-29 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    emmeans          1.8.7   2023-06-23 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    estimability     1.4.1   2022-08-05 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    evaluate         0.21    2023-05-05 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    fansi            1.0.4   2023-01-22 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    farver           2.1.1   2022-07-06 [1] CRAN (R 4.3.0)</span></span>
@@ -680,50 +684,50 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;    htmltools        0.5.5   2023-03-23 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    htmlwidgets      1.6.2   2023-03-17 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    httpuv           1.6.11  2023-05-11 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    igraph           1.5.0   2023-06-16 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    igraph           1.5.0.1 2023-07-23 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    inline           0.3.19  2021-05-31 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    jsonlite         1.8.5   2023-06-05 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    jsonlite         1.8.7   2023-06-29 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    knitr            1.43    2023-05-25 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    labeling         0.4.2   2020-10-20 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    later            1.3.1   2023-05-02 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    lattice          0.21-8  2023-04-05 [2] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    lattice          0.21-8  2023-04-05 [2] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    lifecycle        1.0.3   2022-10-07 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    loo              2.6.0   2023-03-31 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    lubridate      * 1.9.2   2023-02-10 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    magrittr         2.0.3   2022-03-30 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    markdown         1.7     2023-05-16 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    MASS           * 7.3-60  2023-05-04 [2] CRAN (R 4.3.1)</span></span>
-<span><span class="co">#&gt;    Matrix           1.5-4.1 2023-05-18 [2] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    MASS           * 7.3-60  2023-05-04 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    Matrix           1.6-0   2023-07-08 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    matrixStats      1.0.0   2023-06-02 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    mime             0.12    2021-09-28 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    miniUI           0.1.1.1 2018-05-18 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    munsell          0.5.0   2018-06-12 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    mvtnorm          1.2-2   2023-06-08 [1] CRAN (R 4.3.1)</span></span>
-<span><span class="co">#&gt;    nlme             3.1-162 2023-01-31 [2] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    nlme             3.1-162 2023-01-31 [2] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    pillar           1.9.0   2023-03-22 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    pkgbuild         1.4.2   2023-06-26 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    pkgconfig        2.0.3   2019-09-22 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    plyr             1.8.8   2022-11-11 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    posterior        1.4.1   2023-03-14 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    prettyunits      1.1.1   2020-01-24 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    processx         3.8.1   2023-04-18 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    processx         3.8.2   2023-06-30 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    promises         1.2.0.1 2021-02-11 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    ps               1.7.5   2023-04-18 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    purrr          * 1.0.1   2023-01-10 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    R6               2.5.1   2021-08-19 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    ragg             1.2.5   2023-01-12 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    Rcpp           * 1.0.10  2023-01-22 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    Rcpp           * 1.0.11  2023-07-06 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;  D RcppParallel     5.1.7   2023-02-27 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    readr          * 2.1.4   2023-02-10 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    reshape2         1.4.4   2020-04-09 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    rlang            1.1.1   2023-04-28 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    rmarkdown        2.23    2023-07-01 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    rstan            2.21.8  2023-01-17 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    rstantools       2.3.1   2023-03-30 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    rstudioapi       0.14    2022-08-22 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    rstan            2.26.22 2023-05-02 [1] local</span></span>
+<span><span class="co">#&gt;    rstantools       2.3.1.1 2023-07-18 [1] CRAN (R 4.3.1)</span></span>
+<span><span class="co">#&gt;    rstudioapi       0.15.0  2023-07-07 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    scales           1.2.1   2022-08-20 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    sessioninfo      1.2.2   2021-12-06 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;    shiny            1.7.4.1 2023-07-06 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    shiny            1.7.4.1 2023-07-06 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    shinyjs          2.1.0   2021-12-23 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    shinystan        2.6.0   2022-03-03 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    shinythemes      1.2.0   2021-01-25 [1] CRAN (R 4.3.0)</span></span>
@@ -741,6 +745,7 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;    timechange       0.2.0   2023-01-11 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    tzdb             0.4.0   2023-05-12 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    utf8             1.2.3   2023-01-31 [1] CRAN (R 4.3.0)</span></span>
+<span><span class="co">#&gt;    V8               4.3.3   2023-07-18 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    vctrs            0.6.3   2023-06-14 [1] CRAN (R 4.3.1)</span></span>
 <span><span class="co">#&gt;    withr            2.5.0   2022-03-03 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    xfun             0.39    2023-04-20 [1] CRAN (R 4.3.0)</span></span>
@@ -749,8 +754,8 @@ Use contrast coding so the model parameters represent the differences between su
 <span><span class="co">#&gt;    yaml             2.3.7   2023-01-23 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt;    zoo              1.8-12  2023-04-13 [1] CRAN (R 4.3.0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  [1] C:/Users/trist/AppData/Local/R/win-library/4.3</span></span>
-<span><span class="co">#&gt;  [2] C:/Program Files/R/R-4.3.1/library</span></span>
+<span><span class="co">#&gt;  [1] C:/Users/Tristan/AppData/Local/R/win-library/4.3</span></span>
+<span><span class="co">#&gt;  [2] C:/Program Files/R/R-4.3.0/library</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  D ── DLL MD5 mismatch, broken installation.</span></span>
 <span><span class="co">#&gt; </span></span>
