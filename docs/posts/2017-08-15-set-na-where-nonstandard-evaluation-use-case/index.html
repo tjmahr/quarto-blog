@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="TJ Mahr">
+<meta name="dcterms.date" content="2017-08-15">
+<meta name="description" content="Bottling up magic spells">
+<title>my experimental quarto blog - set_na_where(): a nonstandard evaluation use case</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script><style>
+
+      .quarto-title-block .quarto-title-banner {
+        background-image: url(jovi-waqa-1280.jpg);
+background-size: cover;
+      }
+</style>
+<link rel="stylesheet" href="../../downlit-underline.css">
+<link rel="stylesheet" href="../../title-block.css">
+</head>
+<body class="floating nav-fixed slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">my experimental quarto blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+<div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">set_na_where(): a nonstandard evaluation use case</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/tjmahr/quarto-blog/blob/main/posts/2017-08-15-set-na-where-nonstandard-evaluation-use-case/index.qmd"><i class="bi"></i> Code</button></div></div>
+                  <div>
+        <div class="description">
+          Bottling up magic spells
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">r</div>
+                <div class="quarto-category">nonstandard evaluation</div>
+                <div class="quarto-category">eyetracking</div>
+                <div class="quarto-category">rlang</div>
+              </div>
+                  </div>
+                <div class="title-block-caption">
+          Photo credit: <a href="https://unsplash.com/photos/gNJn5-C5enE">Jovi Waqa</a>
+        </div>
+          </div>
+
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>TJ Mahr </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 15, 2017</p>
+      </div>
+    </div>
+    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">July 28, 2023</p>
+      </div>
+    </div>
+      
+    </div>
+    
+
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
+   
+  <ul>
+<li><a href="#strange-eyetracking-data" id="toc-strange-eyetracking-data" class="nav-link active" data-scroll-target="#strange-eyetracking-data">Strange eyetracking data</a></li>
+  <li>
+<a href="#a-function-to-recode-values-in-many-columns-as-na" id="toc-a-function-to-recode-values-in-many-columns-as-na" class="nav-link" data-scroll-target="#a-function-to-recode-values-in-many-columns-as-na">A function to recode values in many columns as <code>NA</code></a>
+  <ul class="collapse">
+<li><a href="#bottling-up-magic-spells" id="toc-bottling-up-magic-spells" class="nav-link" data-scroll-target="#bottling-up-magic-spells">Bottling up magic spells</a></li>
+  <li><a href="#casting-spells" id="toc-casting-spells" class="nav-link" data-scroll-target="#casting-spells">Casting spells</a></li>
+  <li><a href="#finishing-touches" id="toc-finishing-touches" class="nav-link" data-scroll-target="#finishing-touches">Finishing touches</a></li>
+  </ul>
+</li>
+  </ul></nav>
+</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content"><p>In this post, I describe a recent case where I used rlang’s <a href="http://rlang.tidyverse.org/articles/tidy-evaluation.html">tidy evaluation</a> system to do some data-cleaning. This example is not particularly involved, but it demonstrates is a basic but powerful idea: That we can capture the expressions that a user writes, pass them around as data, and make some 💫 magic ✨ happen. This technique in R is called <a href="http://adv-r.had.co.nz/Computing-on-the-language.html"><em>nonstandard evaluation</em></a>.</p>
+<section id="strange-eyetracking-data" class="level2 page-columns page-full"><h2 class="anchored" data-anchor-id="strange-eyetracking-data">Strange eyetracking data</h2>
+<p>Last week, I had to deal with a file with some eyetracking data from a sequence-learning experiment. The eyetracker records the participant’s gaze location at a rate of 60 frames per second—except for this weird file which wrote out ~80 frames each second. In this kind of data, we have one row per eyetracking sample, and each sample records a timestamp and the gaze location :eyes: on the computer screen at each timestamp. In this particular dataset, we have <em>x</em> and <em>y</em> gaze coordinates in pixels (both eyes averaged together, <code>GazeX</code> and <code>GazeY</code>) or in screen proportions (for each eye in the <code>EyeCoord</code> columns.)</p>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rlang.r-lib.org">rlang</a></span><span class="op">)</span></span>
+<span><span class="co"># the data is bundled with an R package I wrote</span></span>
+<span><span class="co"># devtools::install_github("tjmahr/fillgaze")</span></span>
+<span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"test-gaze.csv"</span>, package <span class="op">=</span> <span class="st">"fillgaze"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>Time <span class="op">=</span> <span class="va">Time</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">Time</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">Time</span><span class="op">:</span><span class="va">REyeCoordY</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html">mutate_at</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html">vars</a></span><span class="op">(</span><span class="va">Time</span><span class="op">)</span>, <span class="va">round</span>, <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html">mutate_at</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/vars.html">vars</a></span><span class="op">(</span><span class="va">GazeX</span>, <span class="va">GazeY</span><span class="op">)</span>, <span class="va">round</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">df</span></span>
+<span><span class="co">#&gt; # A tibble: 14,823 × 8</span></span>
+<span><span class="co">#&gt;     Time Trial GazeX GazeY LEyeCoordX LEyeCoordY REyeCoordX REyeCoordY</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1   0       1  1176   643      0.659      0.589      0.566      0.602</span></span>
+<span><span class="co">#&gt;  2   3.5     1 -1920 -1080     -1         -1         -1         -1    </span></span>
+<span><span class="co">#&gt;  3  20.2     1 -1920 -1080     -1         -1         -1         -1    </span></span>
+<span><span class="co">#&gt;  4  36.8     1  1184   648      0.664      0.593      0.57       0.606</span></span>
+<span><span class="co">#&gt;  5  40       1  1225   617      0.685      0.564      0.591      0.579</span></span>
+<span><span class="co">#&gt;  6  56.7     1 -1920 -1080     -1         -1         -1         -1    </span></span>
+<span><span class="co">#&gt;  7  73.4     1  1188   641      0.665      0.587      0.572      0.6  </span></span>
+<span><span class="co">#&gt;  8  76.6     1  1204   621      0.674      0.568      0.58       0.582</span></span>
+<span><span class="co">#&gt;  9  93.3     1 -1920 -1080     -1         -1         -1         -1    </span></span>
+<span><span class="co">#&gt; 10 110.      1  1189   665      0.666      0.609      0.572      0.622</span></span>
+<span><span class="co">#&gt; # ℹ 14,813 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In this particular eyetracking setup, offscreen looks are coded as negative gaze coordinates, and what’s extra weird here is that every second or third point is incorrectly placed offscreen. We see that in the frequent -1920 values in <code>GazeX</code>. Plotting the first few <em>x</em> and <em>y</em> pixel locations shows the pattern as well.</p>
+<div class="cell page-columns page-full">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">df</span>, <span class="fl">40</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Time</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, size <span class="op">=</span> <span class="fl">2</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">GazeX</span>, color <span class="op">=</span> <span class="st">"GazeX"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">GazeY</span>, color <span class="op">=</span> <span class="st">"GazeY"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Time (ms)"</span>, </span>
+<span>    y <span class="op">=</span> <span class="st">"Screen location (pixels)"</span>, </span>
+<span>    color <span class="op">=</span> <span class="st">"Variable"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
+<span><span class="co">#&gt; ℹ Please use `linewidth` instead.</span></span>
+<span></span>
+<span><span class="va">p</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span></span>
+<span>    <span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">50</span>, y <span class="op">=</span> <span class="op">-</span><span class="fl">200</span>, </span>
+<span>    label <span class="op">=</span> <span class="st">"offscreen"</span>, color <span class="op">=</span> <span class="st">"grey20"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/annotate.html">annotate</a></span><span class="op">(</span></span>
+<span>    <span class="st">"text"</span>, x <span class="op">=</span> <span class="fl">50</span>, y <span class="op">=</span> <span class="fl">200</span>, </span>
+<span>    label <span class="op">=</span> <span class="st">"onscreen"</span>, color <span class="op">=</span> <span class="st">"grey20"</span></span>
+<span>  <span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="index_files/figure-html/missing-data-plot-1.png" class="img-fluid figure-img" width="1800"></p>
+<figcaption class="figure-caption margin-caption">Offscreens looks occurred every two or three samples.</figcaption></figure>
+</div>
+</div>
+</div>
+<p>It is physiologically impossible for a person’s gaze to oscillate so quickly and with such magnitude (the gaze is tracked on a large screen display), so obviously something weird was going on with the experiment software.</p>
+<p>This file motivated me to develop a <a href="https://github.com/tjmahr/fillgaze">general purpose package for interpolating missing data in eyetracking experiments</a>. This package was always something I wanted to do, and this file moved it from the <em>someday</em> list to the <em>today</em> list.</p>
+</section><section id="a-function-to-recode-values-in-many-columns-as-na" class="level2 page-columns page-full"><h2 class="anchored" data-anchor-id="a-function-to-recode-values-in-many-columns-as-na">A function to recode values in many columns as <code>NA</code>
+</h2>
+<p>The first step in handling this problematic dataset is to convert the offscreen values into actual missing (<code>NA</code>) values). Because we have several columns of data, I wanted a succinct way to recode values in multiple columns into <code>NA</code> values.</p>
+<p>First, we sketch out the <em>code we want to write</em> when we’re done.</p>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">set_na_where</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># do things</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">set_na_where</span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">df</span>,</span>
+<span>  GazeX <span class="op">=</span> <span class="va">GazeX</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">500</span> <span class="op">|</span> <span class="fl">2200</span> <span class="op">&lt;</span> <span class="va">GazeX</span>,</span>
+<span>  GazeY <span class="op">=</span> <span class="va">GazeY</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">200</span> <span class="op">|</span> <span class="fl">1200</span> <span class="op">&lt;</span> <span class="va">GazeY</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>That is, after specifying the <code>data</code>, we list off an arbitrary number of column names, and with each name, we provide a rule to determine whether a value in that column is offscreen and should be set to <code>NA</code>. For example, we want every value in <code>GazeX</code> where <code>GazeX &lt; -500</code> or <code>2299 &lt; GazeX</code> is <code>TRUE</code> to be replaced with <code>NA</code>.</p>
+<section id="bottling-up-magic-spells" class="level3"><h3 class="anchored" data-anchor-id="bottling-up-magic-spells">Bottling up magic spells</h3>
+<p>Lines of computer code are magic spells: We say the incantations and things happen around us. Put more formally, the code contains expressions that are evaluated in an environment.</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">hey</span> <span class="op">&lt;-</span> <span class="st">"Hello!"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span><span class="va">hey</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Hello!</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] FALSE</span></span>
+<span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">pi</span> <span class="op">^</span> <span class="fl">2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/exists.html">exists</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 9.869604</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/stop.html">stop</a></span><span class="op">(</span><span class="st">"what are you doing?"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in eval(expr, envir, enclos): what are you doing?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In our function signature, <code>function(data, ...)</code>, the expressions are collected in the special “dots” argument (<code>...</code>). In normal circumstances, we can view the contents of the dots by storing them in a list. Consider:</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">hello_dots</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="fu">hello_dots</span><span class="op">(</span>x <span class="op">=</span> <span class="va">pi</span>, y <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, z <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 3</span></span>
+<span><span class="co">#&gt;  $ x: num 3.14</span></span>
+<span><span class="co">#&gt;  $ y: int [1:10] 1 2 3 4 5 6 7 8 9 10</span></span>
+<span><span class="co">#&gt;  $ z: logi NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>But we not passing in regular data, but expressions that need to be evaluated in a particular location. Below the magic words are uttered and we get an error because they mention things that do not exist in the current environment.</p>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">hello_dots</span><span class="op">(</span>GazeX <span class="op">=</span> <span class="va">GazeX</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">500</span> <span class="op">|</span> <span class="fl">2200</span> <span class="op">&lt;</span> <span class="va">GazeX</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in eval(expr, envir, enclos): object 'GazeX' not found</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>What we need to do is prevent these words from being uttered until the time and place are right. <strong>Nonstandard evaluation is a way of bottling up magic spells and changing how or where they are cast</strong>—sometimes we even change the magic words themselves. We bottle up or <em>capture</em> the expressions given by the user by quoting them. <code><a href="https://rlang.r-lib.org/reference/defusing-advanced.html">quo()</a></code> quotes a single expression, and <code><a href="https://rlang.r-lib.org/reference/defusing-advanced.html">quos()</a></code> (plural) will quote a list of expressions. Below, we capture the expressions stored in the dots :speech_balloon: and then make sure that their names match column names in the dataframe.</p>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">set_na_where</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">dots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html">quos</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">dots</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">anyDuplicated</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">dots</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">dots</span></span>
+<span>  <span class="co"># more to come</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">spells</span> <span class="op">&lt;-</span> <span class="fu">set_na_where</span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">df</span>,</span>
+<span>  GazeX <span class="op">=</span> <span class="va">GazeX</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">500</span> <span class="op">|</span> <span class="fl">2200</span> <span class="op">&lt;</span> <span class="va">GazeX</span>, </span>
+<span>  GazeY <span class="op">=</span> <span class="va">GazeY</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">200</span> <span class="op">|</span> <span class="fl">1200</span> <span class="op">&lt;</span> <span class="va">GazeY</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">spells</span></span>
+<span><span class="co">#&gt; &lt;list_of&lt;quosure&gt;&gt;</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $GazeX</span></span>
+<span><span class="co">#&gt; &lt;quosure&gt;</span></span>
+<span><span class="co">#&gt; expr: ^GazeX &lt; -500 | 2200 &lt; GazeX</span></span>
+<span><span class="co">#&gt; env:  global</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $GazeY</span></span>
+<span><span class="co">#&gt; &lt;quosure&gt;</span></span>
+<span><span class="co">#&gt; expr: ^GazeY &lt; -200 | 1200 &lt; GazeY</span></span>
+<span><span class="co">#&gt; env:  global</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I call these results <code>spells</code> because it just contains the expressions stored as data. We can interrogate these results like data. We can query the names of the stored data, and we can extract values (the quoted expressions).</p>
+<div class="cell">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">spells</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "GazeX" "GazeY"</span></span>
+<span><span class="va">spells</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; &lt;quosure&gt;</span></span>
+<span><span class="co">#&gt; expr: ^GazeX &lt; -500 | 2200 &lt; GazeX</span></span>
+<span><span class="co">#&gt; env:  global</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="casting-spells" class="level3"><h3 class="anchored" data-anchor-id="casting-spells">Casting spells</h3>
+<p>We can cast a spell by evaluating an expression. To keep the incantation from fizzling out, we specify that we want to evaluate the expression <em>inside</em> of the dataframe. The function <code>eval_tidy(expr, data)</code> lets us do just that: evaluate an expression <code>expr</code> inside of some <code>data</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Evaluate the first expression inside of the data</span></span>
+<span><span class="va">xs_to_set_na</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rlang.r-lib.org/reference/eval_tidy.html">eval_tidy</a></span><span class="op">(</span><span class="va">spells</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, data <span class="op">=</span> <span class="va">df</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Just the first few bc there are 10000+ values</span></span>
+<span><span class="va">xs_to_set_na</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">]</span></span>
+<span><span class="co">#&gt;  [1] FALSE  TRUE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE</span></span>
+<span><span class="co">#&gt; [13] FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE FALSE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In fact, we can evaluate them all at once with by applying <code><a href="https://rlang.r-lib.org/reference/eval_tidy.html">eval_tidy()</a></code> on each listed expression.</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">to_set_na</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">spells</span>, <span class="va">eval_tidy</span>, data <span class="op">=</span> <span class="va">df</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span><span class="op">(</span><span class="va">to_set_na</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 2</span></span>
+<span><span class="co">#&gt;  $ GazeX: logi [1:14823] FALSE TRUE TRUE FALSE FALSE TRUE ...</span></span>
+<span><span class="co">#&gt;  $ GazeY: logi [1:14823] FALSE TRUE TRUE FALSE FALSE TRUE ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="finishing-touches" class="level3 page-columns page-full"><h3 class="anchored" data-anchor-id="finishing-touches">Finishing touches</h3>
+<p>Now, the rest of the function is straightforward. Evaluate each <code>NA</code>-rule on the named columns, and then set each row where the rule is <code>TRUE</code> to <code>NA</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">set_na_where</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">dots</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rlang.r-lib.org/reference/defusing-advanced.html">quos</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">dots</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span>, <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html">anyDuplicated</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">dots</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">set_to_na</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">dots</span>, <span class="va">eval_tidy</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">col</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">set_to_na</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">data</span><span class="op">[</span><span class="va">set_to_na</span><span class="op">[[</span><span class="va">col</span><span class="op">]</span><span class="op">]</span>, <span class="va">col</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span>
+<span>  <span class="op">}</span></span>
+<span>  </span>
+<span>  <span class="va">data</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">set_na_where</span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">df</span>,</span>
+<span>  GazeX <span class="op">=</span> <span class="va">GazeX</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">500</span> <span class="op">|</span> <span class="fl">2200</span> <span class="op">&lt;</span> <span class="va">GazeX</span>, </span>
+<span>  GazeY <span class="op">=</span> <span class="va">GazeY</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">200</span> <span class="op">|</span> <span class="fl">1200</span> <span class="op">&lt;</span> <span class="va">GazeY</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">results</span></span>
+<span><span class="co">#&gt; # A tibble: 14,823 × 8</span></span>
+<span><span class="co">#&gt;     Time Trial GazeX GazeY LEyeCoordX LEyeCoordY REyeCoordX REyeCoordY</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1   0       1  1176   643      0.659      0.589      0.566      0.602</span></span>
+<span><span class="co">#&gt;  2   3.5     1    NA    NA     -1         -1         -1         -1    </span></span>
+<span><span class="co">#&gt;  3  20.2     1    NA    NA     -1         -1         -1         -1    </span></span>
+<span><span class="co">#&gt;  4  36.8     1  1184   648      0.664      0.593      0.57       0.606</span></span>
+<span><span class="co">#&gt;  5  40       1  1225   617      0.685      0.564      0.591      0.579</span></span>
+<span><span class="co">#&gt;  6  56.7     1    NA    NA     -1         -1         -1         -1    </span></span>
+<span><span class="co">#&gt;  7  73.4     1  1188   641      0.665      0.587      0.572      0.6  </span></span>
+<span><span class="co">#&gt;  8  76.6     1  1204   621      0.674      0.568      0.58       0.582</span></span>
+<span><span class="co">#&gt;  9  93.3     1    NA    NA     -1         -1         -1         -1    </span></span>
+<span><span class="co">#&gt; 10 110.      1  1189   665      0.666      0.609      0.572      0.622</span></span>
+<span><span class="co">#&gt; # ℹ 14,813 more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Visually, we can see that the offscreen values are no longer plotted. Plus, we are told that our data now has missing values.</p>
+<div class="cell page-columns page-full">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># `plot %+% data`: replace the data in `plot` with `data`</span></span>
+<span><span class="va">p</span> <span class="op"><a href="https://ggplot2.tidyverse.org/reference/gg-add.html">%+%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">results</span>, <span class="fl">40</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Removed 15 rows containing missing values (`geom_point()`).</span></span>
+<span><span class="co">#&gt; Removed 15 rows containing missing values (`geom_point()`).</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="index_files/figure-html/no-offscreen-plots-1.png" class="img-fluid figure-img" width="1800"></p>
+<figcaption class="figure-caption margin-caption">Offscreens are no longer plotted.</figcaption></figure>
+</div>
+</div>
+</div>
+<p>One of the quirks about some eyetracking data is that during a blink, sometimes the device will record the <em>x</em> location but not the <em>y</em> location. (I think this happens because blinks move vertically so the horizontal detail can still be inferred in a half-closed eye.) This effect shows up in the data when there are more <code>NA</code> values for the <em>y</em> values than for the <em>x</em> values:</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">count_na</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">subset</span>, <span class="kw">function</span><span class="op">(</span><span class="va">xs</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">xs</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">count_na</span><span class="op">(</span><span class="va">results</span>, <span class="va">GazeX</span>, <span class="va">GazeY</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $GazeX</span></span>
+<span><span class="co">#&gt; [1] 2808</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $GazeY</span></span>
+<span><span class="co">#&gt; [1] 3064</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can equalize these counts by running the function a second time with new rules.</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">set_na_where</span><span class="op">(</span></span>
+<span>    GazeX <span class="op">=</span> <span class="va">GazeX</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">500</span> <span class="op">|</span> <span class="fl">2200</span> <span class="op">&lt;</span> <span class="va">GazeX</span>, </span>
+<span>    GazeY <span class="op">=</span> <span class="va">GazeY</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">200</span> <span class="op">|</span> <span class="fl">1200</span> <span class="op">&lt;</span> <span class="va">GazeY</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">set_na_where</span><span class="op">(</span></span>
+<span>    GazeX <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">GazeY</span><span class="op">)</span>, </span>
+<span>    GazeY <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">GazeX</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">count_na</span><span class="op">(</span><span class="va">GazeX</span>, <span class="va">GazeY</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $GazeX</span></span>
+<span><span class="co">#&gt; [1] 3069</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $GazeY</span></span>
+<span><span class="co">#&gt; [1] 3069</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Alternatively, we can do this all at once by using the same <code>NA</code>-filtering rule on <code>GazeX</code> and <code>GazeY</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">set_na_where</span><span class="op">(</span></span>
+<span>    GazeX <span class="op">=</span> <span class="va">GazeX</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">500</span> <span class="op">|</span> <span class="fl">2200</span> <span class="op">&lt;</span> <span class="va">GazeX</span> <span class="op">|</span> <span class="va">GazeY</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">200</span> <span class="op">|</span> <span class="fl">1200</span> <span class="op">&lt;</span> <span class="va">GazeY</span>, </span>
+<span>    GazeY <span class="op">=</span> <span class="va">GazeX</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">500</span> <span class="op">|</span> <span class="fl">2200</span> <span class="op">&lt;</span> <span class="va">GazeX</span> <span class="op">|</span> <span class="va">GazeY</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">200</span> <span class="op">|</span> <span class="fl">1200</span> <span class="op">&lt;</span> <span class="va">GazeY</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">count_na</span><span class="op">(</span><span class="va">GazeX</span>, <span class="va">GazeY</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $GazeX</span></span>
+<span><span class="co">#&gt; [1] 3069</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $GazeY</span></span>
+<span><span class="co">#&gt; [1] 3069</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These last examples, where we compare different rules, showcases how nonstandard evaluation lets us write in a very succinct and convenient manner and quickly iterate over possible rules. Works like magic, indeed.</p>
+<hr>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Session info
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.3.0 (2023-04-21 ucrt)
+ os       Windows 11 x64 (build 22621)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  English_United States.utf8
+ ctype    English_United States.utf8
+ tz       America/Chicago
+ date     2023-07-28
+ pandoc   3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   1.3.353
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package     * version    date (UTC) lib source
+ assertthat    0.2.1      2019-03-21 [1] CRAN (R 4.3.1)
+ bit           4.0.5      2022-11-15 [1] CRAN (R 4.3.0)
+ bit64         4.0.5      2020-08-30 [1] CRAN (R 4.3.0)
+ cli           3.6.1      2023-03-23 [1] CRAN (R 4.3.0)
+ colorspace    2.1-0      2023-01-23 [1] CRAN (R 4.3.0)
+ crayon        1.5.2      2022-09-29 [1] CRAN (R 4.3.0)
+ digest        0.6.33     2023-07-07 [1] CRAN (R 4.3.1)
+ dplyr       * 1.1.2      2023-04-20 [1] CRAN (R 4.3.0)
+ emo           0.0.0.9000 2023-07-27 [1] Github (hadley/emo@3f03b11)
+ evaluate      0.21       2023-05-05 [1] CRAN (R 4.3.0)
+ fansi         1.0.4      2023-01-22 [1] CRAN (R 4.3.0)
+ farver        2.1.1      2022-07-06 [1] CRAN (R 4.3.0)
+ fastmap       1.1.1      2023-02-24 [1] CRAN (R 4.3.0)
+ generics      0.1.3      2022-07-05 [1] CRAN (R 4.3.0)
+ ggplot2     * 3.4.2      2023-04-03 [1] CRAN (R 4.3.0)
+ glue          1.6.2      2022-02-24 [1] CRAN (R 4.3.0)
+ gtable        0.3.3      2023-03-21 [1] CRAN (R 4.3.0)
+ hms           1.1.3      2023-03-21 [1] CRAN (R 4.3.0)
+ htmltools     0.5.5      2023-03-23 [1] CRAN (R 4.3.0)
+ htmlwidgets   1.6.2      2023-03-17 [1] CRAN (R 4.3.0)
+ jsonlite      1.8.7      2023-06-29 [1] CRAN (R 4.3.1)
+ knitr         1.43       2023-05-25 [1] CRAN (R 4.3.0)
+ labeling      0.4.2      2020-10-20 [1] CRAN (R 4.3.0)
+ lifecycle     1.0.3      2022-10-07 [1] CRAN (R 4.3.0)
+ lubridate     1.9.2      2023-02-10 [1] CRAN (R 4.3.0)
+ magrittr      2.0.3      2022-03-30 [1] CRAN (R 4.3.0)
+ munsell       0.5.0      2018-06-12 [1] CRAN (R 4.3.0)
+ pillar        1.9.0      2023-03-22 [1] CRAN (R 4.3.0)
+ pkgconfig     2.0.3      2019-09-22 [1] CRAN (R 4.3.0)
+ purrr         1.0.1      2023-01-10 [1] CRAN (R 4.3.0)
+ R6            2.5.1      2021-08-19 [1] CRAN (R 4.3.0)
+ ragg          1.2.5      2023-01-12 [1] CRAN (R 4.3.0)
+ readr         2.1.4      2023-02-10 [1] CRAN (R 4.3.0)
+ rlang       * 1.1.1      2023-04-28 [1] CRAN (R 4.3.0)
+ rmarkdown     2.23       2023-07-01 [1] CRAN (R 4.3.0)
+ rstudioapi    0.15.0     2023-07-07 [1] CRAN (R 4.3.1)
+ scales        1.2.1      2022-08-20 [1] CRAN (R 4.3.0)
+ sessioninfo   1.2.2      2021-12-06 [1] CRAN (R 4.3.0)
+ stringi       1.7.12     2023-01-11 [1] CRAN (R 4.3.0)
+ stringr       1.5.0      2022-12-02 [1] CRAN (R 4.3.0)
+ systemfonts   1.0.4      2022-02-11 [1] CRAN (R 4.3.0)
+ textshaping   0.3.6      2021-10-13 [1] CRAN (R 4.3.0)
+ tibble        3.2.1      2023-03-20 [1] CRAN (R 4.3.0)
+ tidyselect    1.2.0      2022-10-10 [1] CRAN (R 4.3.0)
+ timechange    0.2.0      2023-01-11 [1] CRAN (R 4.3.0)
+ tzdb          0.4.0      2023-05-12 [1] CRAN (R 4.3.0)
+ utf8          1.2.3      2023-01-31 [1] CRAN (R 4.3.0)
+ vctrs         0.6.3      2023-06-14 [1] CRAN (R 4.3.1)
+ vroom         1.6.3      2023-04-28 [1] CRAN (R 4.3.0)
+ withr         2.5.0      2022-03-03 [1] CRAN (R 4.3.0)
+ xfun          0.39       2023-04-20 [1] CRAN (R 4.3.0)
+ yaml          2.3.7      2023-01-23 [1] CRAN (R 4.3.0)
+
+ [1] C:/Users/Tristan/AppData/Local/R/win-library/4.3
+ [2] C:/Program Files/R/R-4.3.0/library
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</div>
+
+
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

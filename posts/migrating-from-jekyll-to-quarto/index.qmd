@@ -10,9 +10,11 @@ This is the **not** first post in a Quarto blog. Welcome!
 
 ![](thumbnail.jpg)
 
-- [ ] I want a banner image on top like the old site with a credit to the source.
+- [x] I want a banner image on top like the old site with a credit to
+  the source.
 
-- [x] I had to put `fig-width: 8` under `format > html` in `_quarto.yml`. I also pushed other knitr options here: 
+- [x] I had to put `fig-width: 8` under `format > html` in
+  `_quarto.yml`. I also pushed other knitr options here: 
 
 ```
     fig-asp: 0.618
@@ -33,9 +35,11 @@ I don't want the green links. If I set the link color, that still leaves the gre
 link color in the table of contents.
 
 
-- [x] I want a slightly larger font size. Set `fontsize: 1.1em` in _quarto.yml
+- [x] I want a slightly larger font size. Set `fontsize: 1.1em` in
+  \_quarto.yml
 
-- [x] All of my old manual downlit attempts are styled differently than actual downlit urls. Added a check.
+- [x] All of my old manual downlit attempts are styled differently than
+  actual downlit urls. Added a check.
 
 - [x] I want underlined downlit links. Done by adding a new css file.
 
@@ -52,6 +56,31 @@ It's configuration. Lots of configuration.
 - project level
 - directory level
 - post-level yaml
+
+## big ideas first
+
+Over the years on the Jekyll site, blogging from 2016 to 2023, I had
+slowly opted into customizations, tricks and workarounds. I developed my
+own build pipeline using targets and knitr. Each post included a
+`_footer.Rmd` child document that included the session information at
+the bottom of the post. I could never get downlit source-code linking to
+work with Jekyll's syntax highlighting system, so I recreated the effect
+where I could. R and Windows could gobble up emoji until very recently
+so I had used `emo::ji()` and Github `:inline_emoji:` syntax as a
+workaround. I sometimes used Jekyll-specific syntax and site-specific
+theming---a no-go in Quarto-land---and I have to port them over now too.
+**All of these features and customizations become potential liabilities
+at migration time.** 
+
+
+
+## getting started
+
+Quarto blogs are a supported project template in RStudio, so to create
+the blog I went to File \> New Project \> New Directory \> Quarto Blog
+to get the project infrastructure in place. To preview/build the site, I
+could click Build \> Render Website or <kbd>Ctrl</kbd> +
+<kbd>Shift</kbd> + <kbd>B</kbd>. Easy peasy.
 
 ## file locations
 
@@ -148,7 +177,8 @@ broken URLS.
 Fortunately, document metadata can help us here by letting us create an
 alias for the post:
 
-```yaml
+```{yaml}
+#| filename: "Quarto index.qmd front matter (key portion)"
 aliases:
   - "/bayesian-ordering-constraint/"
 ```
@@ -171,6 +201,67 @@ To migrate a single post, we need to do the following steps:
 
 
 
+## post footers
+
+At the end of each post on the Jekyll site, I included a footer with 
+
+  1.  the date the post was knitted,
+  2.  a link to the post's source code on GitHub, and
+  3.  a footnote with the session info.
+
+We can get (1) for free by using inline R code in the YAML front matter
+on each post:
+
+```{yaml}
+#| filename: "index.qmd front matter (key portion)"
+date-modified: "`r format(Sys.Date())`"
+```
+
+We can also get (2) for free by using more YAML features. First, we tell
+Quarto the URL for the GitHub repo:
+
+```{yaml}
+#| filename: "_quarto.yml (key portion)"
+website:
+  repo-url: "https://github.com/tjmahr/quarto-blog"
+```
+
+Then enable links to the source code on all the posts. I probably could have 
+included this setting `_quarto.yml` but I didn't want to deal with the link
+being enabled unintentionally if I create any non-blogpost documents. 
+
+```{yaml}
+#| filename: "posts/_metadata.yml (key portion)"
+code-tools:
+  source: repo
+```
+
+As for (3), I had implemented this featured originally in a pretty
+unsophisticated manner: A file called `_R/_footer.Rmd` generated the
+post footer, and I included it as a child document in knitr at the
+bottom of every post.
+
+````
+```{{r, include = FALSE}}
+.parent_doc <- knitr::current_input()
+```
+```{{r, child = "_R/_footer.Rmd"}}
+```
+````
+
+We are going to do the same thing, but using Quarto. The bottom of each
+post now includes an `include`
+[shortcode](https://quarto.org/docs/authoring/includes.html):
+
+````
+{{< include ../_footer.Rmd >}}
+````
+
+File-paths in a blog post are relative to the index.qmd file---which is
+nice for things like datasets or image assets---so to go up to the
+parent directory for `_footer.Rmd`, we use `../`.
+
+
 
 ## post headers
 
@@ -178,6 +269,7 @@ On the Jekyll site, I could include a banner image, a caption for the
 banner image, and a color overlay for the image using YAML metadata:
 
 ```{yaml}
+#| filename: "Jekyll Rmd front matter (key portion)"
 header:
   overlay_image: assets/images/2022-03-neon.jpg
   image_description: A neon sign that says 'neon'
@@ -199,6 +291,7 @@ word "neon" is a thematic gag.
 We can get a banner image in Quarto using the YAML front matter:
 
 ```{yaml}
+#| filename: "Quarto index.qmd front matter (key portion)"
 title-block-banner: 2022-03-neon.jpg
 image: 2022-03-neon.jpg
 ```
@@ -231,8 +324,8 @@ css in `title-block.css` and tell `_quarto.yaml` about it.
 }
 ```
 
-```{yaml, filename = "_quarto.yml"}
-# (the key portion of the file)
+```{yaml}
+#| filename: "_quarto.yml (key portion)"
 format:
   html:
     css:
@@ -253,8 +346,8 @@ banner template and keep the other parts in tact.
 First, let's make the photo caption into a structured piece of metadata in the
 YAML front matter. This step will create pieces of data the template can see:
 
-```{yaml, filename = "yaml front matter"}
-# (the key portion of the file)
+```{yaml}
+#| filename: "index.qmd front matter (key portion)"
 title-block-banner-caption: 
   credit: Slava Kuzminsk
   link: https://unsplash.com/photos/qnHOFl4VuFc
@@ -262,7 +355,9 @@ title-block-banner-caption:
 
 We download the HTML title banner template [from
 GitHub](https://github.com/quarto-dev/quarto-cli/blob/main/src/resources/formats/html/templates/banner/title-block.html)
-and store it in `partials/title-block.html`. We then modify the file, adding the 5 unindented lines towards the bottom.
+and store it in `partials/title-block.html`. We then modify the file,
+adding the unindented lines towards the bottom.
+
 ```{html, filename = "partials/title-block.html"}
 <header id="title-block-header" class="quarto-title-block default$if(quarto-template-params.banner-header-class)$ $quarto-template-params.banner-header-class$$endif$">
   <div class="quarto-title-banner">
@@ -289,11 +384,13 @@ and store it in `partials/title-block.html`. We then modify the file, adding the
       $endif$
     </div>
 
+<!-- 🆕 start -->
 $if(title-block-banner-caption)$
 <div class = "title-block-caption">
 Photo credit: <a href="$title-block-banner-caption.link$">$title-block-banner-caption.credit$</a>
 </div>
 $endif$
+<!-- 🆕 end -->
   
   </div>
   $title-metadata.html()$
@@ -309,8 +406,8 @@ lines, we check for a `title-block-banner-caption` and then add a
 
 To activate this partial template, we have to add a field to `_quarto.yml`:
 
-```{yaml, filename = "_quarto.yml"}
-# (the key portion of the file)
+```{yaml}
+#| filename: "_quarto.yml (key portion)"
 format:
   html:
     template-partials:
@@ -348,10 +445,13 @@ and a photo credit.
 :::
 
 
+
 ## other notes
 
 
-### listings
+### homepage / listings
+
+tktktk
 
 ### downlit links
 
@@ -386,19 +486,13 @@ code a:any-link {
 }
 ```
 
-```{yaml, filename = "_quarto.yml"}
-# (the key portion of the file)
+```{yaml}
+#| filename: "_quarto.yml (key portion)"
 format:
   html:
     css:
       - downlit-underline.css
 ```
-
-
-
-
-
-
 
 
 

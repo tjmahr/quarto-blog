@@ -1,12 +1,12 @@
 ---
 title: Recent adventures with lazyeval
-tags:
-- lazyeval
-- rstanarm
-- r
 date: '2016-08-15'
 date-modified: '`r format(Sys.Date())`'
 description: Some basic uses of nonstandard evaluation.
+categories:
+- lazyeval
+- rstanarm
+- r
 aliases:
 - /recent-adventures-with-lazyeval/
 ---

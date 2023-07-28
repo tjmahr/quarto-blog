@@ -1,24 +1,24 @@
 ---
 title: Self-documenting plots in ggplot2
+date: '2022-03-10'
+date-modified: '`r format(Sys.Date())`'
+description: Including plotting code as an annotation on a plot
 categories:
 - r
 - rlang
 - ggplot2
 - nonstandard evaluation
-share: yes
-date: '2022-03-10'
-date-modified: '`r format(Sys.Date())`'
-description: Including plotting code as an annotation on a plot
-title-block-banner: 2022-03-neon.jpg
-image: 2022-03-neon.jpg
-title-block-banner-caption: 
-  credit: Slava Kuzminsk
-  link: https://unsplash.com/photos/qnHOFl4VuFc
-hheader:
+image_header:
   overlay_image: 2022-03-neon.jpg
   image_description: A neon sign that says 'neon'
   overlay_filter: rgba(10, 10, 10, 0.5)
   caption: 'Photo credit: [**Slava Kuzminsk**](https://unsplash.com/photos/qnHOFl4VuFc)'
+  comment: These are old properties from the Jekyll site
+title-block-banner: 2022-03-neon.jpg
+image: 2022-03-neon.jpg
+title-block-banner-caption:
+  credit: Slava Kuzminsk
+  link: https://unsplash.com/photos/qnHOFl4VuFc
 aliases:
 - /self-titled-ggplot2-plots/
 ---

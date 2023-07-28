@@ -7,14 +7,20 @@ if (isNamespaceLoaded("rstan") || isNamespaceLoaded("rstanarm")) {
 if (isNamespaceLoaded("cmdstanr")) {
   .session_info$platform$`stan (cmdstanr)` <- cmdstanr::cmdstan_version()
 }
+.session_info$platform$quarto <- quarto::quarto_version() |> as.character()
 ```
-
 
 ***
 
-Session info:
+::: {.callout-note appearance="minimal"}
 
-```{r}
+## Session info
+
+```{r, results = 'markup', echo = FALSE, comment = ""}
 #| results: "markup"
 .session_info
 ```
+
+:::
+
+

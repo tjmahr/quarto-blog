@@ -118,8 +118,23 @@ migrate_yaml_data <- function(data_file) {
   d$categories <- d$tags
   d$image_header <- d$header
   d$excerpt <- NULL
-  d$categories <- NULL
+  d$tags <- NULL
   d$header <- NULL
+  d$share <- NULL
+
+  if (!is.null(d$image_header$overlay_image)) {
+    d$image_header$comment <- "These are old properties from the Jekyll site"
+    d$`title-block-banner` <- basename(d$image_header$overlay_image)
+    d$image <- d$`title-block-banner`
+    if (!is.null(d$image_header$caption)) {
+      parsed <- d$image_header$caption |>
+        stringr::str_match("\\[\\*\\*(.+)\\*\\*\\]\\((.+)\\)$")
+      d$`title-block-banner-caption` <- list(
+        credit = parsed[2],
+        link = parsed[3]
+      )
+    }
+  }
 
   d$aliases <- list(paste0("/", data_file$slug, "/"))
   data_file$data_yaml_migrated <- d
@@ -178,9 +193,9 @@ migrate_assets <- function(data_file, base_url = "https://raw.githubusercontent.
     }
   }
 
-  if (!is.null(data_file$data_yaml_migrated$..header$overlay_image)) {
-    data_file$data_yaml_migrated$..header$overlay_image <-
-      basename(data_file$data_yaml_migrated$..header$overlay_image)
+  if (!is.null(data_file$data_yaml_migrated$image_header$overlay_image)) {
+    data_file$data_yaml_migrated$image_header$overlay_image <-
+      basename(data_file$data_yaml_migrated$image_header$overlay_image)
   }
 
   data_file$lines_body <- data_file$lines_body |>
@@ -260,7 +275,10 @@ slugs <- fs::path_home_r() |>
 
 urls <- file.path("https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R", slugs)
 
+
+
 url_raw <- sample(urls, size = 1)
+url_raw <- urls[34]
 d <- import_jekyll_post(url_raw)
 check_post(d$lines_current)
 
@@ -270,12 +288,19 @@ check_post(d$lines_current)
 url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2016-08-15-recent-adventures-with-lazyeval.Rmd"
 d <- import_jekyll_post(url_raw)
 check_post(d$lines_current)
+d$data_yaml_migrated |> ymlthis::as_yml()
+
+
 url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2015-10-06-confusion-matrix-late-talkers.Rmd"
 d <- import_jekyll_post(url_raw)
 check_post(d$lines_current)
+d$data_yaml_migrated |> ymlthis::as_yml()
+
+
 url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2017-08-15-set-na-where-nonstandard-evaluation-use-case.Rmd"
 d <- import_jekyll_post(url_raw)
 check_post(d$lines_current)
+d$data_yaml_migrated |> ymlthis::as_yml()
 
 
 
@@ -293,9 +318,4 @@ for (post in current_posts) {
     cli::cli_inform("{.strong {post}}")
     check_post(brio::read_lines(post))
   })
-
 }
-
-d$data_yaml
-d$data_yaml_migrated
-d$lines_migrated |> head(20)

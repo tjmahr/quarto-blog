@@ -1,11 +1,11 @@
 ---
 title: Confusion matrix statistics on late talker diagnoses
-tags:
-- caret
-- r
 date: '2015-10-06'
 date-modified: '`r format(Sys.Date())`'
 description: Posterior predictive values and the like.
+categories:
+- caret
+- r
 aliases:
 - /confusion-matrix-late-talkers/
 ---

@@ -173,7 +173,7 @@ background-size: cover;
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">July 27, 2023</p>
+        <p class="date-modified">July 28, 2023</p>
       </div>
     </div>
       
@@ -226,11 +226,11 @@ background-size: cover;
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html">geom_histogram</a></span><span class="op">(</span>bins <span class="op">=</span> <span class="fl">20</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"A basic histogram"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>In order to have a titled plot along with this annotation, we need some way to combine these two graphical objects together (the code and the plot produced by ggplot2). I like the <a href="https://patchwork.data-imaginist.com/articles/patchwork.html">patchwork</a> package for this job. Here we use <code><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html">wrap_elements()</a></code> to capture the plot into a “patch” that patchwork can annotate.</p>
+<p>In order to have a titled plot along with this annotation, we need some way to combine these two graphical objects together (the code and the plot produced by ggplot2). I like the <a href="https://patchwork.data-imaginist.com/articles/patchwork.html">patchwork</a> package for this job. Here we use <code><a href="https://rdrr.io/pkg/patchwork/man/wrap_elements.html">wrap_elements()</a></code> to capture the plot into a “patch” that patchwork can annotate.</p>
 <div class="cell">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="va">p_plot</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">p_text</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="va">p_plot</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/plot_annotation.html">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">p_text</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/from-strings-1.png" class="img-fluid" style="width:50.0%" alt="A ggplot2 plot of a histogram with the plotting code above the image. Here the title is in the default font."></p>
 </div>
@@ -252,8 +252,8 @@ background-size: cover;
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="va">p_plot</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">p_text</span>, theme <span class="op">=</span> <span class="va">title_theme</span><span class="op">)</span>  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="va">p_plot</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/plot_annotation.html">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">p_text</span>, theme <span class="op">=</span> <span class="va">title_theme</span><span class="op">)</span>  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/from-strings-consolas-1.png" class="img-fluid" style="width:50.0%" alt="A ggplot2 plot of a histogram with the plotting code above the image. Here the title is in Consolas."></p>
 </div>
@@ -261,8 +261,8 @@ background-size: cover;
 <p>One problem with this setup is that the plotting code has to be edited in two places: the plot <code>p_plot</code> and the title <code>p_text</code>. As a result, it’s easy for these two pieces of code to fall out of sync with each other, turning our self-documenting plot into a lying liar plot.</p>
 <p>The solution is pretty easy: Tell R that <code>p_text</code> is code with <code><a href="https://rdrr.io/r/base/parse.html">parse()</a></code> and evaluate the code with <code><a href="https://rdrr.io/r/base/eval.html">eval()</a></code>:</p>
 <div class="cell">
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html">eval</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/parse.html">parse</a></span><span class="op">(</span>text <span class="op">=</span> <span class="va">p_text</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">p_text</span>, theme <span class="op">=</span> <span class="va">title_theme</span><span class="op">)</span>  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html">eval</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/parse.html">parse</a></span><span class="op">(</span>text <span class="op">=</span> <span class="va">p_text</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/plot_annotation.html">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">p_text</span>, theme <span class="op">=</span> <span class="va">title_theme</span><span class="op">)</span>  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/from-strings-consolas-eval-1.png" class="img-fluid" style="width:50.0%" alt="A ggplot2 plot of a histogram with the plotting code above the image."></p>
 </div>
@@ -300,8 +300,8 @@ background-size: cover;
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"A basic histogram"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html">eval</a></span><span class="op">(</span><span class="va">p_code</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/expr_label.html">expr_text</a></span><span class="op">(</span><span class="va">p_code</span><span class="op">)</span>, theme <span class="op">=</span> <span class="va">title_theme</span><span class="op">)</span>  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html">eval</a></span><span class="op">(</span><span class="va">p_code</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/plot_annotation.html">plot_annotation</a></span><span class="op">(</span>title <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/expr_label.html">expr_text</a></span><span class="op">(</span><span class="va">p_code</span><span class="op">)</span>, theme <span class="op">=</span> <span class="va">title_theme</span><span class="op">)</span>  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/from-code-eval-1.png" class="img-fluid" style="width:50.0%" alt="A ggplot2 plot of a histogram with the plotting code above the image. In this case, the title is mostly on one line and some text is cut off from the image."></p>
 </div>
@@ -315,8 +315,8 @@ background-size: cover;
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"A basic histogram"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html">eval</a></span><span class="op">(</span><span class="va">p_code</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html">plot_annotation</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html">eval</a></span><span class="op">(</span><span class="va">p_code</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/plot_annotation.html">plot_annotation</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/expr_label.html">expr_text</a></span><span class="op">(</span><span class="va">p_code</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>      <span class="fu">grkstyle</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/grkstyle/man/grk_style.html">grk_style_text</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>      <span class="co"># reformatting returns a vector of lines,</span></span>
@@ -343,8 +343,8 @@ background-size: cover;
 <span>    <span class="fu">grkstyle</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/grkstyle/man/grk_style.html">grk_style_text</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span>collapse <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  </span>
-<span>  <span class="fu">patchwork</span><span class="fu">::</span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html">eval</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu">patchwork</span><span class="fu">::</span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_annotation.html">plot_annotation</a></span><span class="op">(</span></span>
+<span>  <span class="fu">patchwork</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/wrap_elements.html">wrap_elements</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/eval.html">eval</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">patchwork</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/patchwork/man/plot_annotation.html">plot_annotation</a></span><span class="op">(</span></span>
 <span>      title <span class="op">=</span> <span class="va">title</span>, </span>
 <span>      theme <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
 <span>        plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_text</a></span><span class="op">(</span></span>
@@ -427,79 +427,90 @@ background-size: cover;
 </div>
 <p>I have no idea how to go about exploiting this feature for self-documenting plots, however.</p>
 <hr>
-<p>Session info:</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Session info
+</div>
+</div>
+<div class="callout-body-container callout-body">
 <div class="cell">
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">.session_info</span></span>
-<span><span class="co">#&gt; ─ Session info ───────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt;  setting  value</span></span>
-<span><span class="co">#&gt;  version  R version 4.3.0 (2023-04-21 ucrt)</span></span>
-<span><span class="co">#&gt;  os       Windows 11 x64 (build 22621)</span></span>
-<span><span class="co">#&gt;  system   x86_64, mingw32</span></span>
-<span><span class="co">#&gt;  ui       RTerm</span></span>
-<span><span class="co">#&gt;  language (EN)</span></span>
-<span><span class="co">#&gt;  collate  English_United States.utf8</span></span>
-<span><span class="co">#&gt;  ctype    English_United States.utf8</span></span>
-<span><span class="co">#&gt;  tz       America/Chicago</span></span>
-<span><span class="co">#&gt;  date     2023-07-27</span></span>
-<span><span class="co">#&gt;  pandoc   3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ─ Packages ───────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt;  package     * version date (UTC) lib source</span></span>
-<span><span class="co">#&gt;  cli           3.6.1   2023-03-23 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  colorspace    2.1-0   2023-01-23 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  digest        0.6.33  2023-07-07 [1] CRAN (R 4.3.1)</span></span>
-<span><span class="co">#&gt;  dplyr         1.1.2   2023-04-20 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  evaluate      0.21    2023-05-05 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  extrafont     0.19    2023-01-18 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  extrafontdb   1.0     2012-06-11 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  fansi         1.0.4   2023-01-22 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  farver        2.1.1   2022-07-06 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  fastmap       1.1.1   2023-02-24 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  generics      0.1.3   2022-07-05 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  ggplot2     * 3.4.2   2023-04-03 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  glue          1.6.2   2022-02-24 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  grkstyle      0.2.1   2023-04-24 [1] Github (gadenbuie/grkstyle@2dac4d7)</span></span>
-<span><span class="co">#&gt;  gtable        0.3.3   2023-03-21 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  htmltools     0.5.5   2023-03-23 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  htmlwidgets   1.6.2   2023-03-17 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  jsonlite      1.8.7   2023-06-29 [1] CRAN (R 4.3.1)</span></span>
-<span><span class="co">#&gt;  knitr         1.43    2023-05-25 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  labeling      0.4.2   2020-10-20 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  lifecycle     1.0.3   2022-10-07 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  magrittr      2.0.3   2022-03-30 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  munsell       0.5.0   2018-06-12 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  patchwork   * 1.1.2   2022-08-19 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  pillar        1.9.0   2023-03-22 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  pkgconfig     2.0.3   2019-09-22 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  purrr         1.0.1   2023-01-10 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  R.cache       0.16.0  2022-07-21 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  R.methodsS3   1.8.2   2022-06-13 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  R.oo          1.25.0  2022-06-12 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  R.utils       2.12.2  2022-11-11 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  R6            2.5.1   2021-08-19 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  ragg          1.2.5   2023-01-12 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  rlang         1.1.1   2023-04-28 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  rmarkdown     2.23    2023-07-01 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  rprojroot     2.0.3   2022-04-02 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  rstudioapi    0.15.0  2023-07-07 [1] CRAN (R 4.3.1)</span></span>
-<span><span class="co">#&gt;  Rttf2pt1      1.3.12  2023-01-22 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  scales        1.2.1   2022-08-20 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  sessioninfo   1.2.2   2021-12-06 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  styler        1.10.1  2023-06-05 [1] CRAN (R 4.3.1)</span></span>
-<span><span class="co">#&gt;  systemfonts   1.0.4   2022-02-11 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  textshaping   0.3.6   2021-10-13 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  tibble        3.2.1   2023-03-20 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  tidyselect    1.2.0   2022-10-10 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  utf8          1.2.3   2023-01-31 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  vctrs         0.6.3   2023-06-14 [1] CRAN (R 4.3.1)</span></span>
-<span><span class="co">#&gt;  withr         2.5.0   2022-03-03 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  xfun          0.39    2023-04-20 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt;  yaml          2.3.7   2023-01-23 [1] CRAN (R 4.3.0)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  [1] C:/Users/Tristan/AppData/Local/R/win-library/4.3</span></span>
-<span><span class="co">#&gt;  [2] C:/Program Files/R/R-4.3.0/library</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ──────────────────────────────────────────────────────────────────────────────</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.3.0 (2023-04-21 ucrt)
+ os       Windows 11 x64 (build 22621)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  English_United States.utf8
+ ctype    English_United States.utf8
+ tz       America/Chicago
+ date     2023-07-28
+ pandoc   3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   1.3.353
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package     * version date (UTC) lib source
+ cli           3.6.1   2023-03-23 [1] CRAN (R 4.3.0)
+ colorspace    2.1-0   2023-01-23 [1] CRAN (R 4.3.0)
+ digest        0.6.33  2023-07-07 [1] CRAN (R 4.3.1)
+ dplyr         1.1.2   2023-04-20 [1] CRAN (R 4.3.0)
+ evaluate      0.21    2023-05-05 [1] CRAN (R 4.3.0)
+ extrafont     0.19    2023-01-18 [1] CRAN (R 4.3.0)
+ extrafontdb   1.0     2012-06-11 [1] CRAN (R 4.3.0)
+ fansi         1.0.4   2023-01-22 [1] CRAN (R 4.3.0)
+ farver        2.1.1   2022-07-06 [1] CRAN (R 4.3.0)
+ fastmap       1.1.1   2023-02-24 [1] CRAN (R 4.3.0)
+ generics      0.1.3   2022-07-05 [1] CRAN (R 4.3.0)
+ ggplot2     * 3.4.2   2023-04-03 [1] CRAN (R 4.3.0)
+ glue          1.6.2   2022-02-24 [1] CRAN (R 4.3.0)
+ grkstyle      0.2.1   2023-04-24 [1] Github (gadenbuie/grkstyle@2dac4d7)
+ gtable        0.3.3   2023-03-21 [1] CRAN (R 4.3.0)
+ htmltools     0.5.5   2023-03-23 [1] CRAN (R 4.3.0)
+ htmlwidgets   1.6.2   2023-03-17 [1] CRAN (R 4.3.0)
+ jsonlite      1.8.7   2023-06-29 [1] CRAN (R 4.3.1)
+ knitr         1.43    2023-05-25 [1] CRAN (R 4.3.0)
+ labeling      0.4.2   2020-10-20 [1] CRAN (R 4.3.0)
+ lifecycle     1.0.3   2022-10-07 [1] CRAN (R 4.3.0)
+ magrittr      2.0.3   2022-03-30 [1] CRAN (R 4.3.0)
+ munsell       0.5.0   2018-06-12 [1] CRAN (R 4.3.0)
+ patchwork   * 1.1.2   2022-08-19 [1] CRAN (R 4.3.0)
+ pillar        1.9.0   2023-03-22 [1] CRAN (R 4.3.0)
+ pkgconfig     2.0.3   2019-09-22 [1] CRAN (R 4.3.0)
+ purrr         1.0.1   2023-01-10 [1] CRAN (R 4.3.0)
+ R.cache       0.16.0  2022-07-21 [1] CRAN (R 4.3.0)
+ R.methodsS3   1.8.2   2022-06-13 [1] CRAN (R 4.3.0)
+ R.oo          1.25.0  2022-06-12 [1] CRAN (R 4.3.0)
+ R.utils       2.12.2  2022-11-11 [1] CRAN (R 4.3.0)
+ R6            2.5.1   2021-08-19 [1] CRAN (R 4.3.0)
+ ragg          1.2.5   2023-01-12 [1] CRAN (R 4.3.0)
+ rlang         1.1.1   2023-04-28 [1] CRAN (R 4.3.0)
+ rmarkdown     2.23    2023-07-01 [1] CRAN (R 4.3.0)
+ rprojroot     2.0.3   2022-04-02 [1] CRAN (R 4.3.0)
+ rstudioapi    0.15.0  2023-07-07 [1] CRAN (R 4.3.1)
+ Rttf2pt1      1.3.12  2023-01-22 [1] CRAN (R 4.3.0)
+ scales        1.2.1   2022-08-20 [1] CRAN (R 4.3.0)
+ sessioninfo   1.2.2   2021-12-06 [1] CRAN (R 4.3.0)
+ styler        1.10.1  2023-06-05 [1] CRAN (R 4.3.1)
+ systemfonts   1.0.4   2022-02-11 [1] CRAN (R 4.3.0)
+ textshaping   0.3.6   2021-10-13 [1] CRAN (R 4.3.0)
+ tibble        3.2.1   2023-03-20 [1] CRAN (R 4.3.0)
+ tidyselect    1.2.0   2022-10-10 [1] CRAN (R 4.3.0)
+ utf8          1.2.3   2023-01-31 [1] CRAN (R 4.3.0)
+ vctrs         0.6.3   2023-06-14 [1] CRAN (R 4.3.1)
+ withr         2.5.0   2022-03-03 [1] CRAN (R 4.3.0)
+ xfun          0.39    2023-04-20 [1] CRAN (R 4.3.0)
+ yaml          2.3.7   2023-01-23 [1] CRAN (R 4.3.0)
+
+ [1] C:/Users/Tristan/AppData/Local/R/win-library/4.3
+ [2] C:/Program Files/R/R-4.3.0/library
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
 </div>
 
 
