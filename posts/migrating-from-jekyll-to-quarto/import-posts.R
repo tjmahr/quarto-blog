@@ -1,22 +1,29 @@
 #' Import a Jekyll blog post
-#' @param url_raw the full url to a raw .Rmd file
+#' @param target_post relative path to the post file in the Jekyll site
+#' @param base_url URL to the raw GitHub space for the site
+#' @param post_dir relative path to the posts directory in the Quarto site
 #' @param overwrite whether to overwrite an existing `index.qmd` file. Defaults
 #'   to `FALSE`. When migrating a post, we may need to hand-fix some issues in
 #'   the `index.qmd`. We don't want to overwrite these changes on accident.
 #' @return a list containing the contents of the original post, the modified
 #'   post, and metadata about the post.
-import_jekyll_post <- function(url_raw, overwrite = FALSE) {
+import_jekyll_post <- function(target_post, base_url, post_dir = "posts", overwrite = FALSE) {
+  url_raw <- file.path(base_url, target_post)
   file <- file.path(tempdir(), basename(url_raw))
   download_result <- download.file(url_raw, file, quiet = TRUE)
-
-  data_file <- read_post_data(file)
+  if (download_result == 0) {
+    data_file <- list(file = file, post_dir = post_dir) |>
+      prepare_post_data()
+  } else {
+    stop("download failed")
+  }
 
   if (dir.exists(data_file$path_post_dir)) {
     cli::cli_alert_info(
       "Post folder already exists {.path {data_file$path_post_dir}}"
     )
   } else {
-    dir.create(data_file$path_post_dir, showWarnings = FALSE)
+    dir.create(data_file$path_post_dir)
     cli::cli_alert_success(
       "Post folder created {.path {data_file$path_post_dir}}"
     )
@@ -25,7 +32,7 @@ import_jekyll_post <- function(url_raw, overwrite = FALSE) {
   data_file <- data_file |>
     migrate_yaml_data() |>
     patch_body_lines() |>
-    migrate_assets()
+    migrate_assets(base_url)
 
   data_file$lines_migrated <- c(
     "---",
@@ -62,15 +69,15 @@ import_jekyll_post <- function(url_raw, overwrite = FALSE) {
 }
 
 #' @param file path to a file to read in
-read_post_data <- function(file) {
+prepare_post_data <- function(data_file) {
   # Check the file for a weird number of YAML delimiters
-  lines <- brio::read_lines(file)
+  lines <- brio::read_lines(data_file$file)
   lines_yaml <- lines |>
     stringr::str_which("^[.-]{3}$")
 
   if (length(lines_yaml) > 2) {
     msg <- glue::glue(
-      "More than 2 YAML delimiters found in {basename(file)}
+      "More than 2 YAML delimiters found in {basename(data_file$file)}
       Lines: `{deparse(dput(lines_yaml))}`"
     )
     warning(msg)
@@ -78,7 +85,7 @@ read_post_data <- function(file) {
 
   if (length(lines_yaml) < 2) {
     msg <- glue::glue(
-      "Less than YAML delimiters found in {basename(file)}
+      "Less than YAML delimiters found in {basename(data_file$file)}
       Lines: `{deparse(dput(lines_yaml))}`"
     )
     stop(msg)
@@ -89,9 +96,11 @@ read_post_data <- function(file) {
   # Let RMarkdown read the YAML metadata for us.
   # (This does not handle general case where there is more than
   # one yaml block in a file.)
-  data_yaml <- rmarkdown::yaml_front_matter(file)
+  data_yaml <- rmarkdown::yaml_front_matter(data_file$file)
 
   tibble::lst(
+    file = data_file$file,
+    post_dir = data_file$post_dir,
     basename = basename(file),
     date = basename |>
       stringr::str_extract("\\d{4}-\\d{1,2}-\\d{1,2}"),
@@ -101,7 +110,7 @@ read_post_data <- function(file) {
     lines = lines,
     lines_body = lines_body,
     data_yaml = data_yaml,
-    path_post_dir = file.path("posts", tools::file_path_sans_ext(basename)),
+    path_post_dir = file.path(post_dir, tools::file_path_sans_ext(basename)),
     path_post = file.path(path_post_dir, "index.qmd")
   )
 }
@@ -268,54 +277,62 @@ check_post <- function(lines) {
 
 
 
-slugs <- fs::path_home_r() |>
-  fs::path("GitRepos/tjmahr.github.io/_R") |>
-  fs::dir_ls(regexp = "\\d{4}") |>
-  basename()
+scratch <- function() {
+  if (FALSE) {
+    slugs <- fs::path_home_r() |>
+      fs::path("GitRepos/tjmahr.github.io/_R") |>
+      fs::dir_ls(regexp = "\\d{4}") |>
+      basename()
 
-urls <- file.path("https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R", slugs)
-
-
-
-url_raw <- sample(urls, size = 1)
-url_raw <- urls[34]
-d <- import_jekyll_post(url_raw)
-check_post(d$lines_current)
+    urls <- file.path("https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R", slugs)
 
 
 
-
-url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2016-08-15-recent-adventures-with-lazyeval.Rmd"
-d <- import_jekyll_post(url_raw)
-check_post(d$lines_current)
-d$data_yaml_migrated |> ymlthis::as_yml()
+    url_raw <- sample(urls, size = 1)
+    url_raw <- urls[34]
 
 
-url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2015-10-06-confusion-matrix-late-talkers.Rmd"
-d <- import_jekyll_post(url_raw)
-check_post(d$lines_current)
-d$data_yaml_migrated |> ymlthis::as_yml()
-
-
-url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2017-08-15-set-na-where-nonstandard-evaluation-use-case.Rmd"
-d <- import_jekyll_post(url_raw)
-check_post(d$lines_current)
-d$data_yaml_migrated |> ymlthis::as_yml()
+    d <- import_jekyll_post(url_raw)
+    check_post(d$lines_current)
 
 
 
-d <- import_jekyll_post(url_raw)
-check_post(d$lines_current)
-# usethis::edit_file(d$path_post)
+
+    url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2016-08-15-recent-adventures-with-lazyeval.Rmd"
+    d <- import_jekyll_post(url_raw)
+    check_post(d$lines_current)
+    d$data_yaml_migrated |> ymlthis::as_yml()
+
+
+    url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2015-10-06-confusion-matrix-late-talkers.Rmd"
+    d <- import_jekyll_post(url_raw)
+    check_post(d$lines_current)
+    d$data_yaml_migrated |> ymlthis::as_yml()
+
+
+    url_raw <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R/2017-08-15-set-na-where-nonstandard-evaluation-use-case.Rmd"
+    d <- import_jekyll_post(url_raw)
+    check_post(d$lines_current)
+    d$data_yaml_migrated |> ymlthis::as_yml()
 
 
 
-current_posts <- fs::dir_ls("posts", glob = "*index.qmd", recurse = TRUE)
+    d <- import_jekyll_post(url_raw)
+    check_post(d$lines_current)
+    # usethis::edit_file(d$path_post)
 
 
-for (post in current_posts) {
-  withr::with_options(list(warn = 1), {
-    cli::cli_inform("{.strong {post}}")
-    check_post(brio::read_lines(post))
-  })
+
+    current_posts <- fs::dir_ls("posts", glob = "*index.qmd", recurse = TRUE)
+
+
+    for (post in current_posts) {
+      withr::with_options(list(warn = 1), {
+        cli::cli_inform("{.strong {post}}")
+        check_post(brio::read_lines(post))
+      })
+    }
+  }
+
+
 }

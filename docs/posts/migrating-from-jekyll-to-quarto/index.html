@@ -174,6 +174,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
 <li><a href="#big-ideas-first" id="toc-big-ideas-first" class="nav-link active" data-scroll-target="#big-ideas-first">big ideas first</a></li>
+  <li><a href="#why-make-the-switch" id="toc-why-make-the-switch" class="nav-link" data-scroll-target="#why-make-the-switch">why make the switch</a></li>
   <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">getting started</a></li>
   <li>
 <a href="#file-locations" id="toc-file-locations" class="nav-link" data-scroll-target="#file-locations">file locations</a>
@@ -182,8 +183,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul>
 </li>
   <li><a href="#the-bare-minimum-for-migrating-a-post" id="toc-the-bare-minimum-for-migrating-a-post" class="nav-link" data-scroll-target="#the-bare-minimum-for-migrating-a-post">the bare minimum for migrating a post</a></li>
-  <li><a href="#post-footers" id="toc-post-footers" class="nav-link" data-scroll-target="#post-footers">post footers</a></li>
+  <li>
+<a href="#specific-migration-problems" id="toc-specific-migration-problems" class="nav-link" data-scroll-target="#specific-migration-problems">specific migration problems</a>
+  <ul class="collapse">
+<li><a href="#post-footers" id="toc-post-footers" class="nav-link" data-scroll-target="#post-footers">post footers</a></li>
   <li><a href="#post-headers" id="toc-post-headers" class="nav-link" data-scroll-target="#post-headers">post headers</a></li>
+  </ul>
+</li>
   <li>
 <a href="#other-notes" id="toc-other-notes" class="nav-link" data-scroll-target="#other-notes">other notes</a>
   <ul class="collapse">
@@ -191,14 +197,424 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#downlit-links" id="toc-downlit-links" class="nav-link" data-scroll-target="#downlit-links">downlit links</a></li>
   </ul>
 </li>
+  <li><a href="#scratch" id="toc-scratch" class="nav-link" data-scroll-target="#scratch">scratch</a></li>
   </ul></nav>
 </nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
     </div>
 <!-- main -->
-<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content"><p>This is the <strong>not</strong> first post in a Quarto blog. Welcome!</p>
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content"><p>This post is a set of notes on how I migrated my blog from Jekyll (a Ruby based blogging system) to Quarto (a Pandoc/RMarkdown-ish based blogging system).</p>
 <p><img src="thumbnail.jpg" class="img-fluid"></p>
+<section id="big-ideas-first" class="level2"><h2 class="anchored" data-anchor-id="big-ideas-first">big ideas first</h2>
+<p>Over the years on the Jekyll site, blogging from 2016 to 2023, I had slowly opted into customizations, tricks and workarounds. I developed my own build pipeline using targets and knitr. Each post included a <code>_footer.Rmd</code> child document that included the session information at the bottom of the post. I could never get downlit source-code linking to work with Jekyll’s syntax highlighting system, so I recreated the effect where I could. R and Windows could gobble up emoji until very recently so I had used <code><a href="https://rdrr.io/pkg/emo/man/ji.html">emo::ji()</a></code> and Github <code>:inline_emoji:</code> syntax as a workaround. I sometimes used Jekyll-specific syntax and site-specific theming—a no-go in Quarto-land—and I have to port them over now too. <strong>All of these features and customizations become potential liabilities at migration time.</strong></p>
+</section><section id="why-make-the-switch" class="level2"><h2 class="anchored" data-anchor-id="why-make-the-switch">why make the switch</h2>
+</section><section id="getting-started" class="level2"><h2 class="anchored" data-anchor-id="getting-started">getting started</h2>
+<p>Quarto blogs are a supported project template in RStudio, so to create the blog I went to File &gt; New Project &gt; New Directory &gt; Quarto Blog to get the project infrastructure in place. To preview/build the site, I could click Build &gt; Render Website or <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>. Easy peasy.</p>
+</section><section id="file-locations" class="level2"><h2 class="anchored" data-anchor-id="file-locations">file locations</h2>
+<p>My Jekyll blog had the following, very simplified, high-level structure.</p>
+<pre><code>.
+├── 📁 _R 
+│   ├── 📁 _drafts
+│   ├── 📄 2022-03-10-self-titled-ggplot2-plots.Rmd
+│   └── [other .Rmd files]
+├── 📁 _posts
+│   ├── 📄 2022-03-10-self-titled-ggplot2-plots.md
+│   └── [other .md files]
+├── 📁 _drafts
+├── 📁 _site
+│   ├── 📁 self-titled-ggplot2-plots
+│   │   └── 📄 index.html
+│   ├── [other directories for each post]
+|   └── 📄 index.html
+└── 📁 assets
+|   ├── 📁 css
+|   ├── 📁 images
+|   |   ├── 🌅 2022-03-neon.jpg
+|   |   └── [other images for each post]
+|   └── 📁 js
+└── 📄 _targets.R</code></pre>
+<p>Where the workflow is:</p>
+<ul>
+<li>I write the post as .Rmd file in the <code>_R</code> folder.</li>
+<li>I have <a href="https://docs.ropensci.org/targets/">targets</a> (<code>_targets.R</code>) check the .Rmd files for changes and run knitr on any that have changed, creating the .md file in the <code>_posts</code> folder. (targets also spell-checks all of the files on each run.)</li>
+<li>I push the .md files to GitHub, and it runs Jekyll to produce the folders and .html files in the <code>_site</code> folder and serve the <code>_site</code> folder to visitors.</li>
+</ul>
+<p>If I want to include any non-figure images, I have to store them in <code>assets/images</code>. If want to develop a draft, I have to keep it in a separate workflow. (If an .md file ends up in <code>_posts</code>, it is published.) Finally, the date in the filename is significant. It sets the “date published” for the post, and the date is later stripped off for the final address of the post in the published site.</p>
+<p>Here is the parallel set up in my Quarto site:</p>
+<pre><code>.
+├── 📁 posts 
+│   ├── 📁 2022-03-10-self-titled-ggplot2-plots
+│   |   ├── 🌅 2022-03-neon.jpg
+│   |   └── 📄 index.qmd
+│   ├── [other directories for each post]
+│   └── 📄 _metadata.yml
+├── 📁 docs
+│   ├── 📁 posts
+|   │   ├── 📁 2022-03-10-self-titled-ggplot2-plots
+|   │   |   ├── 🌅 2022-03-neon.jpg
+|   │   |   └── 📄 index.html
+|   |   └── [other directories for each post]
+│   └── 📄 index.html
+└── 📄 _quarto.yml</code></pre>
+<p>Here, Quarto runs the .qmd -&gt; .md -&gt; .html pipeline, and the <code>docs</code> folder is published as-is as the website on GitHub.</p>
+<p>Look at how much simpler this is layout is. Notably:</p>
+<ul>
+<li>The <code>_drafts</code> folder business is gone, because we use document metadata data (set <code>draft: true</code> in the YAML header) to indicate <a href="https://quarto.org/docs/websites/website-blog.html#drafts">draft status</a>.</li>
+<li>Assets for individual posts are stored alongside the post in the post directory.</li>
+</ul>
+<p>Here, the date in the filename is not significant to Quarto; it helps me out because I want my posts to be sorted in chronological order by date published. In order to set the date for a post, I have to set <code>date: "2023-07-03"</code> in the document’s YAML header.</p>
+<section id="broken-urls-and-redirects" class="level3"><h3 class="anchored" data-anchor-id="broken-urls-and-redirects">broken URLs and redirects</h3>
+<p>The addresses created by Jekyll did not include the date: <code>self-titled-ggplot2-plots/index.html</code>. But in Quarto, the folder name carries over to the site: <code>posts/2022-03-10-self-titled-ggplot2-plots/index.html</code>. I am not sure how to get Quarto to automatically change output folder names, and this sucks because any pre-existing links to my posts now point to broken URLS.</p>
+<p>Fortunately, document metadata can help us here by letting us create an alias for the post:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Quarto index.qmd front matter (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aliases</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="st">"/self-titled-ggplot2-plots/"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>Quarto will create a simple page at <code>/self-titled-ggplot2-plots/index.html</code> that will redirect to the proper URL.</p>
+</section></section><section id="the-bare-minimum-for-migrating-a-post" class="level2"><h2 class="anchored" data-anchor-id="the-bare-minimum-for-migrating-a-post">the bare minimum for migrating a post</h2>
+<p>To migrate a single post, we need to do the following steps:</p>
+<ol type="1">
+<li>Download the .Rmd file from <code>_R/[post-date-and-filename].Rmd</code> and save it to <code>posts/[post-date-and-filename]/index.qmd</code>.</li>
+<li>Download any assets referenced in the .Rmd file to <code>posts/[post-date-and-filename]</code> and update the locations in the .qmd file accordingly.</li>
+<li>Migrate YAML metadata.</li>
+<li>Replace Jekyll-specific syntax and theming with Quarto versions.</li>
+</ol>
+<p>For things like steps 1–3, I was able to write R functions to handle this migration. For things like 4, I wrote an R function to run a series of checks on a file for potential issues.</p>
+<p>Here is an example of the functions running on two posts.</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/source.html">source</a></span><span class="op">(</span><span class="st">"import-posts.R"</span><span class="op">)</span></span>
+<span><span class="va">base_url</span> <span class="op">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/20e6ab146716425f485ca4f0c81f18aaccebb10f"</span> </span>
+<span><span class="va">post_dir</span> <span class="op">&lt;-</span> <span class="st">"_demo/posts"</span></span>
+<span></span>
+<span><span class="va">data_post</span> <span class="op">&lt;-</span> <span class="fu">import_jekyll_post</span><span class="op">(</span></span>
+<span>  target_post <span class="op">=</span> <span class="st">"_R/2022-03-10-self-titled-ggplot2-plots.Rmd"</span>, </span>
+<span>  base_url <span class="op">=</span> <span class="va">base_url</span>, </span>
+<span>  post_dir <span class="op">=</span> <span class="va">post_dir</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; ✔ Post folder created '_demo/posts/2022-03-10-self-titled-ggplot2-plots'</span></span>
+<span><span class="co">#&gt; ✔ Migrated `2022-03-neon.jpg`</span></span>
+<span><span class="co">#&gt; ✔ Post file created '_demo/posts/2022-03-10-self-titled-ggplot2-plots/index.qmd'</span></span>
+<span></span>
+<span><span class="va">data_post</span><span class="op">$</span><span class="va">lines_current</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">check_post</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Manually linked code found:</span></span>
+<span><span class="co">#&gt; [71] [`element_text()`](`r a_element_text`):</span></span>
+<span><span class="co">#&gt; [115] [`wrap_elements()`](`r a_wrap_elements`) to c</span></span>
+<span><span class="co">#&gt; [157] [`parse()`](`r a_parse`) and evaluate</span></span>
+<span><span class="co">#&gt; [158] [`eval()`](`r a_eval`):</span></span>
+<span><span class="co">#&gt; [176] First, we are going to use [`rlang::expr()`](`r a_expr`) to</span></span>
+<span><span class="co">#&gt; [244] make is using [`rlang::enexpr()`](`r a_enexpr`) ins</span></span>
+<span></span>
+<span><span class="va">data_post</span> <span class="op">&lt;-</span> <span class="fu">import_jekyll_post</span><span class="op">(</span></span>
+<span>  target_post <span class="op">=</span> <span class="st">"_R/2023-07-03-bayesian-ordering-constraint.Rmd"</span>, </span>
+<span>  base_url <span class="op">=</span> <span class="va">base_url</span>, </span>
+<span>  post_dir <span class="op">=</span> <span class="va">post_dir</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; ✔ Post folder created '_demo/posts/2023-07-03-bayesian-ordering-constraint'</span></span>
+<span><span class="co">#&gt; ✔ Migrated `2023-07-ruins-1280.jpg`</span></span>
+<span><span class="co">#&gt; ✔ Migrated `2023-07-bayes-sign.jpeg`</span></span>
+<span><span class="co">#&gt; ✔ Post file created '_demo/posts/2023-07-03-bayesian-ordering-constraint/index.qmd'</span></span>
+<span></span>
+<span><span class="va">data_post</span><span class="op">$</span><span class="va">lines_current</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">check_post</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Jekyll macro syntax found:</span></span>
+<span><span class="co">#&gt; [289] {% include figure image_path="20</span></span>
+<span><span class="co">#&gt; Warning: Manually linked code found:</span></span>
+<span><span class="co">#&gt; [88] Use brms's monotonic effect [`mo()`][brms-mo] syntax.</span></span>
+<span><span class="co">#&gt; [200] [`contrast()`](https://rdrr.io/r/stats/c</span></span>
+<span><span class="co">#&gt; [519] [`matlib::Ginv()`](https://cran.r-proj</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>check_post()</code> function runs over a file and looks for the lines of text with the following issues:</p>
+<ul>
+<li>references to <code>assets/</code>
+</li>
+<li>Jekyll syntax</li>
+<li>manually linked code (which should be handled by downlit)</li>
+<li>emoji workarounds (use native emoji)</li>
+</ul></section><section id="specific-migration-problems" class="level2 page-columns page-full"><h2 class="anchored" data-anchor-id="specific-migration-problems">specific migration problems</h2>
+<section id="post-footers" class="level3"><h3 class="anchored" data-anchor-id="post-footers">post footers</h3>
+<p>At the end of each post on the Jekyll site, I included a footer with</p>
+<ol type="1">
+<li>the date the post was knitted,</li>
+<li>a link to the post’s source code on GitHub, and</li>
+<li>a footnote with the session info.</li>
+</ol>
+<p>We can get (1) for free by using inline R code in the YAML front matter on each post:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>index.qmd front matter (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">date-modified</span><span class="kw">:</span><span class="at"> </span><span class="st">"`r format(Sys.Date())`"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>We can also get (2) for free by using more YAML features. First, we tell Quarto the URL for the GitHub repo:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>_quarto.yml (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">website</span><span class="kw">:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">repo-url</span><span class="kw">:</span><span class="at"> </span><span class="st">"https://github.com/tjmahr/quarto-blog"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>Then enable links to the source code on all the posts. I probably could have included this setting <code>_quarto.yml</code> but I didn’t want to deal with the link being enabled unintentionally if I create any non-blogpost documents.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>posts/_metadata.yml (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">code-tools</span><span class="kw">:</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">source</span><span class="kw">:</span><span class="at"> repo</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>As for (3), I had implemented this featured originally in a pretty unsophisticated manner: A file called <code>_R/_footer.Rmd</code> generated the post footer, and I included it as a child document in knitr at the bottom of every post.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, include = FALSE}</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>.parent_doc <span class="ot">&lt;-</span> knitr<span class="sc">::</span><span class="fu">current_input</span>()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, child = "_R/_footer.Rmd"}</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We are going to do the same thing, but using Quarto. The bottom of each post now includes an <code>include</code> <a href="https://quarto.org/docs/authoring/includes.html">shortcode</a>:</p>
+<pre><code>{{&lt; include ../_footer.Rmd &gt;}}</code></pre>
+<p>File-paths in a blog post are relative to the index.qmd file—which is nice for things like datasets or image assets—so to go up to the parent directory for <code>_footer.Rmd</code>, we use <code>../</code>.</p>
+</section><section id="post-headers" class="level3 page-columns page-full"><h3 class="anchored" data-anchor-id="post-headers">post headers</h3>
+<p>On the Jekyll site, I could include a banner image, a caption for the banner image, and a color overlay for the image using YAML metadata:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Jekyll Rmd front matter (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">header</span><span class="kw">:</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">overlay_image</span><span class="kw">:</span><span class="at"> assets/images/2022-03-neon.jpg</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">image_description</span><span class="kw">:</span><span class="at"> A neon sign that says 'neon'</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">overlay_filter</span><span class="kw">:</span><span class="at"> rgba(10, 10, 10, 0.5)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">caption</span><span class="kw">:</span><span class="at"> </span><span class="st">'Photo credit: [**Slava Kuzminsk**](https://unsplash.com/photos/qnHOFl4VuFc)'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>Here is the result:</p>
+<div class="column-body-outset">
+<p><img src="jekyll-post-header-example.png" class="img-fluid" alt="A header on the Jekyll site. It is a neon sign of the word 'neon'."></p>
+</div>
+<p>The post featured here is about ggplot2 plots that contain their own source code in the title, so the background image of a neon sign of the word “neon” is a thematic gag.</p>
+<p>We can get a banner image in Quarto using the YAML front matter:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Quarto index.qmd front matter (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">title-block-banner</span><span class="kw">:</span><span class="at"> 2022-03-neon.jpg</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">image</span><span class="kw">:</span><span class="at"> 2022-03-neon.jpg</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>where <code>image</code> set the image that accompanies the post on the list of blog posts.</p>
+<p>Here is the result:</p>
+<div class="column-body-outset">
+<p><img src="quarto-post-header.png" class="img-fluid" alt="A header on the default Quarto site. We cannot see the word 'neon'."></p>
+</div>
+<p>Note that we cannot see the word “neon” and the title is hard to read without the overlaid color on the image. We can fix these issues by using CSS to create a color background that blends with the image and centering the background image. I also set the font-color to be white for added contrast. In Jekyll, we could customize the color layer for each post, but we do not have that ability here. We store this custom css in <code>title-block.css</code> and tell <code>_quarto.yaml</code> about it.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>title-block.css</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.quarto-title-block</span> <span class="fu">.quarto-title-banner</span> {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-position-x</span>: <span class="dv">50</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-position-y</span>: <span class="dv">50</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-blend-mode</span>: overlay<span class="op">;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-color</span>: <span class="fu">rgba(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">.5</span><span class="fu">)</span><span class="op">;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="fu">rgb(</span><span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="fu">)</span><span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<style type="text/css">
+.quarto-title-block .quarto-title-banner {
+  background-position-x: 50%;
+  background-position-y: 50%;
+  background-blend-mode: overlay;
+  background-color: rgba(10, 10, 10, .5);
+  color: rgb(255, 255, 255);
+}
+</style>
+</div>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>_quarto.yml (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">html</span><span class="kw">:</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">css</span><span class="kw">:</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> title-block.css</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<!-- This addition to the  -->
+<p>We still have a major problem at this point: We cannot use these banner images without including the photo credit credit. Fortunately, we can patch this title banner by using a <a href="https://quarto.org/docs/journals/templates.html#template-partials">template partial</a>. Quarto documents like these blog posts are built by plugging data into an HTML template, and this template is itself templated (these subtemplates are the partials). That means, we can change just the title banner template and keep the other parts in tact.</p>
+<p>First, let’s make the photo caption into a structured piece of metadata in the YAML front matter. This step will create pieces of data the template can see:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>index.qmd front matter (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">title-block-banner-caption</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">credit</span><span class="kw">:</span><span class="at"> Slava Kuzminsk</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">link</span><span class="kw">:</span><span class="at"> https://unsplash.com/photos/qnHOFl4VuFc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>We download the HTML title banner template <a href="https://github.com/quarto-dev/quarto-cli/blob/main/src/resources/formats/html/templates/banner/title-block.html">from GitHub</a> and store it in <code>partials/title-block.html</code>. We then modify the file, adding the unindented lines towards the bottom.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>partials/title-block.html</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;header</span> <span class="er">id</span><span class="ot">=</span><span class="st">"title-block-header"</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-title-block default$if(quarto-template-params.banner-header-class)$ $quarto-template-params.banner-header-class$$endif$"</span><span class="kw">&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-title-banner"</span><span class="kw">&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-title column-body"</span><span class="kw">&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h1</span> <span class="er">class</span><span class="ot">=</span><span class="st">"title"</span><span class="kw">&gt;</span>$title$<span class="kw">&lt;/h1&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      $if(subtitle)$</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;p</span> <span class="er">class</span><span class="ot">=</span><span class="st">"subtitle lead"</span><span class="kw">&gt;</span>$subtitle$<span class="kw">&lt;/p&gt;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>      $endif$</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      $if(description)$</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;div&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"description"</span><span class="kw">&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>          $description$</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>      $endif$</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      $if(categories)$</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        $if(quarto-template-params.title-block-categories)$</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-categories"</span><span class="kw">&gt;</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        $for(categories)$</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-category"</span><span class="kw">&gt;</span>$categories$<span class="kw">&lt;/div&gt;</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>        $endfor$</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        $endif$</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>      $endif$</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- 🆕 start --&gt;</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>$if(title-block-banner-caption)$</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">class</span> <span class="ot">=</span> <span class="st">"title-block-caption"</span><span class="kw">&gt;</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>Photo credit: <span class="kw">&lt;a</span> <span class="er">href</span><span class="ot">=</span><span class="st">"$title-block-banner-caption.link$"</span><span class="kw">&gt;</span>$title-block-banner-caption.credit$<span class="kw">&lt;/a&gt;</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>$endif$</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- 🆕 end --&gt;</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>  $title-metadata.html()$</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/header&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>In Pandoc’s templating language, we can refer to YAML front matter variables by using dollar signs. For example, <code>$title$</code> inserts the title, and <code>$title-block-banner-caption.link$</code> inserts the <code>link</code> property of the <code>title-block-banner-caption</code> property. In the added lines, we check for a <code>title-block-banner-caption</code> and then add a <code>&lt;div&gt;</code> with a link to the photo source.</p>
+<p>To activate this partial template, we have to add a field to <code>_quarto.yml</code>:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>_quarto.yml (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">html</span><span class="kw">:</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">template-partials</span><span class="kw">:</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> partials/title-block.html</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>We need this addition to the title block to look okay, so we amend <code>title-block.css</code>:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>title-block.css</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.quarto-title-block</span> <span class="fu">.quarto-title-banner</span> {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-position-x</span>: <span class="dv">50</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-position-y</span>: <span class="dv">50</span><span class="dt">%</span><span class="op">;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-blend-mode</span>: overlay<span class="op">;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-color</span>: <span class="fu">rgba(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">.5</span><span class="fu">)</span><span class="op">;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="fu">rgb(</span><span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="fu">)</span><span class="op">;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">.quarto-title-block</span> <span class="fu">.quarto-title-banner</span> <span class="fu">.title-block-caption</span> {</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">font-size</span>: <span class="dv">.75</span><span class="dt">em</span><span class="op">;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="fu">rgba(</span><span class="dv">255</span><span class="op">,</span><span class="dv">255</span><span class="op">,</span><span class="dv">255</span><span class="op">,</span><span class="dv">.7</span><span class="fu">)</span><span class="op">;</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="fu">.quarto-title-block</span> <span class="fu">.quarto-title-banner</span> <span class="fu">.title-block-caption</span> a {</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">text-decoration</span>: <span class="dv">underline</span> <span class="at">!important</span><span class="op">;</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="fu">rgba(</span><span class="dv">255</span><span class="op">,</span><span class="dv">255</span><span class="op">,</span><span class="dv">255</span><span class="op">,</span><span class="dv">.7</span><span class="fu">)</span><span class="op">;</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<style type="text/css">
+.quarto-title-block .quarto-title-banner {
+  background-position-x: 50%;
+  background-position-y: 50%;
+  background-blend-mode: overlay;
+  background-color: rgba(10, 10, 10, .5);
+  color: rgb(255, 255, 255);
+}
+
+.quarto-title-block .quarto-title-banner .title-block-caption {
+  font-size: .75em;
+  color: rgba(255,255,255,.7);
+}
+
+.quarto-title-block .quarto-title-banner .title-block-caption a {
+  text-decoration: underline !important;
+  color: rgba(255,255,255,.7);
+}
+</style>
+</div>
+<p>At last, we have a decent looking title banner with a background image and a photo credit.</p>
+<div class="column-body-outset">
+<p><img src="quarto-post-header-fixed.png" class="img-fluid" alt="A header on the default Quarto site. We can see the word 'neon' and a link to the source of the photo."></p>
+</div>
+</section></section><section id="other-notes" class="level2"><h2 class="anchored" data-anchor-id="other-notes">other notes</h2>
+<section id="homepage-listings" class="level3"><h3 class="anchored" data-anchor-id="homepage-listings">homepage / listings</h3>
+<p>tktktk</p>
+</section><section id="downlit-links" class="level3"><h3 class="anchored" data-anchor-id="downlit-links">downlit links</h3>
+<p>My favorite feature of the Quarto style is the downlit links, where R code is automatically linked to documentation. This piece of code <code><a href="https://rdrr.io/r/stats/lm.html">stats::lm()</a></code> is linked, and I didn’t have to do anything! In my old blog, I would replicate this style by manually adding links or using <code><a href="https://downlit.r-lib.org/reference/autolink.html">downlit::autolink()</a></code> to create links for me. But the links added by downlit and those done by hand have a differently style in the rendered document:</p>
+<ul>
+<li>
+<code><a href="https://rdrr.io/r/stats/lm.html">stats::lm()</a></code> linked by downlit</li>
+<li>
+<a href="https://rdrr.io/r/stats/lm.html"><code>stats::lm()</code></a> linked manually</li>
+</ul>
+<p>This link inconsistency is annoying, so it became one of my automatic checks.</p>
+<p>When I was working on this post, I couldn’t get the above demonstration to work. downlit appeared not to process the file <em>unless</em> the file had an explicit R code block in it which was mystifying!</p>
+<p>By default, the downlit links are not underlined, so I created a file called <code>downlit-underline.css</code> and added it to <code>_quarto.yml</code>. This css is something I had copy-pasted for use in my rmarkdown notebooks, and I have forgetten where I originally found it. I have included it as a comment.</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>downlit-underline.css</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>code a<span class="in">:any-link</span> {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="bu">inherit</span><span class="op">;</span> <span class="co">/* use colour from syntax highlighting */</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">text-decoration</span>: <span class="dv">underline</span><span class="op">;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">text-decoration-color</span>: <span class="cn">#ccc</span><span class="op">;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<style type="text/css">
+code a:any-link {
+  color: inherit; /* use colour from syntax highlighting */
+  text-decoration: underline;
+  text-decoration-color: #ccc;
+}
+</style>
+</div>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>_quarto.yml (key portion)</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">html</span><span class="kw">:</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">css</span><span class="kw">:</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> downlit-underline.css</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section></section><section id="scratch" class="level2"><h2 class="anchored" data-anchor-id="scratch">scratch</h2>
 <ul class="task-list">
 <li><p><input type="checkbox" checked="">I want a banner image on top like the old site with a credit to the source.</p></li>
 <li><p><input type="checkbox" checked="">I had to put <code>fig-width: 8</code> under <code>format &gt; html</code> in <code>_quarto.yml</code>. I also pushed other knitr options here:</p></li>
@@ -226,364 +642,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>I have to convert fig.alt and fig.cap to here.</p>
 <pre><code>#| fig-alt: "Examples of `plot_dist()`"
 #| fig-cap:</code></pre>
-<p>It’s configuration. Lots of configuration.</p>
+<p>This is the <strong>not</strong> first post in a Quarto blog. Welcome! It’s configuration. Lots of configuration.</p>
 <ul>
 <li>project level</li>
 <li>directory level</li>
 <li>post-level yaml</li>
 </ul>
-<section id="big-ideas-first" class="level2"><h2 class="anchored" data-anchor-id="big-ideas-first">big ideas first</h2>
-<p>Over the years on the Jekyll site, blogging from 2016 to 2023, I had slowly opted into customizations, tricks and workarounds. I developed my own build pipeline using targets and knitr. Each post included a <code>_footer.Rmd</code> child document that included the session information at the bottom of the post. I could never get downlit source-code linking to work with Jekyll’s syntax highlighting system, so I recreated the effect where I could. R and Windows could gobble up emoji until very recently so I had used <code><a href="https://rdrr.io/pkg/emo/man/ji.html">emo::ji()</a></code> and Github <code>:inline_emoji:</code> syntax as a workaround. I sometimes used Jekyll-specific syntax and site-specific theming—a no-go in Quarto-land—and I have to port them over now too. <strong>All of these features and customizations become potential liabilities at migration time.</strong></p>
-</section><section id="getting-started" class="level2"><h2 class="anchored" data-anchor-id="getting-started">getting started</h2>
-<p>Quarto blogs are a supported project template in RStudio, so to create the blog I went to File &gt; New Project &gt; New Directory &gt; Quarto Blog to get the project infrastructure in place. To preview/build the site, I could click Build &gt; Render Website or <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>. Easy peasy.</p>
-</section><section id="file-locations" class="level2"><h2 class="anchored" data-anchor-id="file-locations">file locations</h2>
-<p>My Jekyll blog had the following, very simplified, high-level structure.</p>
-<pre><code>.
-├── 📁 _R 
-│   ├── 📁 _drafts
-│   ├── 📄 2023-07-03-bayesian-ordering-constraint.Rmd
-│   └── [other .Rmd files]
-├── 📁 _posts
-│   ├── 📄 2023-07-03-bayesian-ordering-constraint.md
-│   └── [other .md files]
-├── 📁 _drafts
-├── 📁 _site
-│   ├── 📁 bayesian-ordering-constraint
-│   │   └── 📄 index.html
-│   ├── [other directories for each post]
-|   └── 📄 index.html
-└── 📁 assets
-|   ├── 📁 css
-|   ├── 📁 images
-|   |   ├── 🌅 2023-07-ruins-1280.jpg
-|   |   └── [other images for each post]
-|   └── 📁 js
-└── 📄 _targets.R</code></pre>
-<p>Where the workflow is:</p>
-<ul>
-<li>I write the post as .Rmd file in the <code>_R</code> folder.</li>
-<li>I have <a href="https://docs.ropensci.org/targets/">targets</a> (<code>_targets.R</code>) check the .Rmd files for changes and run knitr on any that have changed, creating the .md file in the <code>_posts</code> folder. (targets also spell-checks all of the files on each run.)</li>
-<li>I push the .md files to GitHub, and it runs Jekyll to produce the folders and .html files in the <code>_site</code> folder and serve the <code>_site</code> folder to visitors.</li>
-</ul>
-<p>If I want to include any non-figure images, I have to store them in <code>assets/images</code>. If want to develop a draft, I have to keep it in a separate workflow. (If an .md file ends up in <code>_posts</code>, it is published.) Finally, the date in the filename is significant. It sets the “date published” for the post, and the date is later stripped off for the final address of the post in the published site.</p>
-<p>Here is the parallel set up in my Quarto site:</p>
-<pre><code>.
-├── 📁 posts 
-│   ├── 📁 2023-07-03-bayesian-ordering-constraint
-│   |   ├── 🌅 2023-07-ruins-1280.jpg
-│   |   └── 📄 index.qmd
-│   ├── [other directories for each post]
-│   └── 📄 _metadata.yml
-├── 📁 docs
-│   ├── 📁 posts
-|   │   ├── 📁 2023-07-03-bayesian-ordering-constraint
-|   │   |   ├── 🌅 2023-07-ruins-1280.jpg
-|   │   |   └── 📄 index.html
-|   |   └── [other directories for each post]
-│   └── 📄 index.html
-└── 📄 _quarto.yml</code></pre>
-<p>Here, Quarto runs the .qmd -&gt; .md -&gt; .html pipeline, and the <code>docs</code> folder is published as-is as the website on GitHub.</p>
-<p>Look at how much simpler this is layout is. Notably:</p>
-<ul>
-<li>The <code>_drafts</code> folder business is gone, because we use document metadata data (set <code>draft: true</code> in the YAML header) to indicate <a href="https://quarto.org/docs/websites/website-blog.html#drafts">draft status</a>.</li>
-<li>Assets for individual posts are stored alongside the post in the post directory.</li>
-</ul>
-<p>Here, the date in the filename is not significant to Quarto; it helps me out because I want my posts to be sorted in chronological order by date published. In order to set the date for a post, I have to set <code>date: "2023-07-03"</code> in the document’s YAML header.</p>
-<section id="broken-urls-and-redirects" class="level3"><h3 class="anchored" data-anchor-id="broken-urls-and-redirects">broken URLs and redirects</h3>
-<p>The addresses created by Jekyll did not include the date: <code>bayesian-ordering-constraint/index.html</code>. But in Quarto, the folder name carries over to the site: <code>posts/2023-07-03-bayesian-ordering-constraint/index.html</code>. I am not sure how to get Quarto to automatically change output folder names, and this sucks because any pre-existing links to my posts now point to broken URLS.</p>
-<p>Fortunately, document metadata can help us here by letting us create an alias for the post:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>Quarto index.qmd front matter (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aliases</span><span class="kw">:</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="st">"/bayesian-ordering-constraint/"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Quarto will create a simple page at <code>/bayesian-ordering-constraint/index.html</code> that will redirect to the proper URL.</p>
-</section></section><section id="the-bare-minimum-for-migrating-a-post" class="level2"><h2 class="anchored" data-anchor-id="the-bare-minimum-for-migrating-a-post">the bare minimum for migrating a post</h2>
-<p>To migrate a single post, we need to do the following steps:</p>
-<ol type="1">
-<li>Download the .Rmd file from <code>_R/[post-date-and-filename].Rmd</code> and save it to <code>posts/[post-date-and-filename]/index.qmd</code>.</li>
-<li>Download any assets referenced in the .Rmd file to <code>posts/[post-date-and-filename]</code> and update the locations in the .qmd file accordingly.</li>
-<li>Migrate YAML metadata.</li>
-</ol></section><section id="post-footers" class="level2"><h2 class="anchored" data-anchor-id="post-footers">post footers</h2>
-<p>At the end of each post on the Jekyll site, I included a footer with</p>
-<ol type="1">
-<li>the date the post was knitted,</li>
-<li>a link to the post’s source code on GitHub, and</li>
-<li>a footnote with the session info.</li>
-</ol>
-<p>We can get (1) for free by using inline R code in the YAML front matter on each post:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>index.qmd front matter (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">date-modified</span><span class="kw">:</span><span class="at"> </span><span class="st">"`r format(Sys.Date())`"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>We can also get (2) for free by using more YAML features. First, we tell Quarto the URL for the GitHub repo:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>_quarto.yml (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">website</span><span class="kw">:</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">repo-url</span><span class="kw">:</span><span class="at"> </span><span class="st">"https://github.com/tjmahr/quarto-blog"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Then enable links to the source code on all the posts. I probably could have included this setting <code>_quarto.yml</code> but I didn’t want to deal with the link being enabled unintentionally if I create any non-blogpost documents.</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>posts/_metadata.yml (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">code-tools</span><span class="kw">:</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">source</span><span class="kw">:</span><span class="at"> repo</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>As for (3), I had implemented this featured originally in a pretty unsophisticated manner: A file called <code>_R/_footer.Rmd</code> generated the post footer, and I included it as a child document in knitr at the bottom of every post.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, include = FALSE}</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>.parent_doc <span class="ot">&lt;-</span> knitr<span class="sc">::</span><span class="fu">current_input</span>()</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, child = "_R/_footer.Rmd"}</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We are going to do the same thing, but using Quarto. The bottom of each post now includes an <code>include</code> <a href="https://quarto.org/docs/authoring/includes.html">shortcode</a>:</p>
-<pre><code>{{&lt; include ../_footer.Rmd &gt;}}</code></pre>
-<p>File-paths in a blog post are relative to the index.qmd file—which is nice for things like datasets or image assets—so to go up to the parent directory for <code>_footer.Rmd</code>, we use <code>../</code>.</p>
-</section><section id="post-headers" class="level2 page-columns page-full"><h2 class="anchored" data-anchor-id="post-headers">post headers</h2>
-<p>On the Jekyll site, I could include a banner image, a caption for the banner image, and a color overlay for the image using YAML metadata:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>Jekyll Rmd front matter (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">header</span><span class="kw">:</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">overlay_image</span><span class="kw">:</span><span class="at"> assets/images/2022-03-neon.jpg</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">image_description</span><span class="kw">:</span><span class="at"> A neon sign that says 'neon'</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">overlay_filter</span><span class="kw">:</span><span class="at"> rgba(10, 10, 10, 0.5)</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">caption</span><span class="kw">:</span><span class="at"> </span><span class="st">'Photo credit: [**Slava Kuzminsk**](https://unsplash.com/photos/qnHOFl4VuFc)'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>Here is the result:</p>
-<div class="column-body-outset">
-<p><img src="jekyll-post-header-example.png" class="img-fluid" alt="A header on the Jekyll site. It is a neon sign of the word 'neon'."></p>
-</div>
-<p>The post featured here is about ggplot2 plots that contain their own source code in the title, so the background image of a neon sign of the word “neon” is a thematic gag.</p>
-<p>We can get a banner image in Quarto using the YAML front matter:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>Quarto index.qmd front matter (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">title-block-banner</span><span class="kw">:</span><span class="at"> 2022-03-neon.jpg</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">image</span><span class="kw">:</span><span class="at"> 2022-03-neon.jpg</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>where <code>image</code> set the image that accompanies the post on the list of blog posts.</p>
-<p>Here is the result:</p>
-<div class="column-body-outset">
-<p><img src="quarto-post-header.png" class="img-fluid" alt="A header on the default Quarto site. We cannot see the word 'neon'."></p>
-</div>
-<p>Note that we cannot see the word “neon” and the title is hard to read without the overlaid color on the image. We can fix these issues by using CSS to create a color background that blends with the image and centering the background image. I also set the font-color to be white for added contrast. In Jekyll, we could customize the color layer for each post, but we do not have that ability here. We store this custom css in <code>title-block.css</code> and tell <code>_quarto.yaml</code> about it.</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>title-block.css</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.quarto-title-block</span> <span class="fu">.quarto-title-banner</span> {</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-position-x</span>: <span class="dv">50</span><span class="dt">%</span><span class="op">;</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-position-y</span>: <span class="dv">50</span><span class="dt">%</span><span class="op">;</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-blend-mode</span>: overlay<span class="op">;</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-color</span>: <span class="fu">rgba(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">.5</span><span class="fu">)</span><span class="op">;</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="fu">rgb(</span><span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="fu">)</span><span class="op">;</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<style type="text/css">
-.quarto-title-block .quarto-title-banner {
-  background-position-x: 50%;
-  background-position-y: 50%;
-  background-blend-mode: overlay;
-  background-color: rgba(10, 10, 10, .5);
-  color: rgb(255, 255, 255);
-}
-</style>
-</div>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>_quarto.yml (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">html</span><span class="kw">:</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">css</span><span class="kw">:</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> title-block.css</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<!-- This addition to the  -->
-<p>We still have a major problem at this point: We cannot use these banner images without including the photo credit credit. Fortunately, we can patch this title banner by using a <a href="https://quarto.org/docs/journals/templates.html#template-partials">template partial</a>. Quarto documents like these blog posts are built by plugging data into an HTML template, and this template is itself templated (these subtemplates are the partials). That means, we can change just the title banner template and keep the other parts in tact.</p>
-<p>First, let’s make the photo caption into a structured piece of metadata in the YAML front matter. This step will create pieces of data the template can see:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>index.qmd front matter (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">title-block-banner-caption</span><span class="kw">:</span><span class="at"> </span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">credit</span><span class="kw">:</span><span class="at"> Slava Kuzminsk</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">link</span><span class="kw">:</span><span class="at"> https://unsplash.com/photos/qnHOFl4VuFc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>We download the HTML title banner template <a href="https://github.com/quarto-dev/quarto-cli/blob/main/src/resources/formats/html/templates/banner/title-block.html">from GitHub</a> and store it in <code>partials/title-block.html</code>. We then modify the file, adding the unindented lines towards the bottom.</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>partials/title-block.html</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;header</span> <span class="er">id</span><span class="ot">=</span><span class="st">"title-block-header"</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-title-block default$if(quarto-template-params.banner-header-class)$ $quarto-template-params.banner-header-class$$endif$"</span><span class="kw">&gt;</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-title-banner"</span><span class="kw">&gt;</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-title column-body"</span><span class="kw">&gt;</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h1</span> <span class="er">class</span><span class="ot">=</span><span class="st">"title"</span><span class="kw">&gt;</span>$title$<span class="kw">&lt;/h1&gt;</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      $if(subtitle)$</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;p</span> <span class="er">class</span><span class="ot">=</span><span class="st">"subtitle lead"</span><span class="kw">&gt;</span>$subtitle$<span class="kw">&lt;/p&gt;</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>      $endif$</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>      $if(description)$</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;div&gt;</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"description"</span><span class="kw">&gt;</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>          $description$</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;/div&gt;</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/div&gt;</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>      $endif$</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>      $if(categories)$</span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>        $if(quarto-template-params.title-block-categories)$</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-categories"</span><span class="kw">&gt;</span></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        $for(categories)$</span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;div</span> <span class="er">class</span><span class="ot">=</span><span class="st">"quarto-category"</span><span class="kw">&gt;</span>$categories$<span class="kw">&lt;/div&gt;</span></span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>        $endfor$</span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/div&gt;</span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        $endif$</span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>      $endif$</span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/div&gt;</span></span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- 🆕 start --&gt;</span></span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>$if(title-block-banner-caption)$</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">class</span> <span class="ot">=</span> <span class="st">"title-block-caption"</span><span class="kw">&gt;</span></span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>Photo credit: <span class="kw">&lt;a</span> <span class="er">href</span><span class="ot">=</span><span class="st">"$title-block-banner-caption.link$"</span><span class="kw">&gt;</span>$title-block-banner-caption.credit$<span class="kw">&lt;/a&gt;</span></span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>$endif$</span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- 🆕 end --&gt;</span></span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/div&gt;</span></span>
-<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>  $title-metadata.html()$</span>
-<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/header&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>In Pandoc’s templating language, we can refer to YAML front matter variables by using dollar signs. For example, <code>$title$</code> inserts the title, and <code>$title-block-banner-caption.link$</code> inserts the <code>link</code> property of the <code>title-block-banner-caption</code> property. In the added lines, we check for a <code>title-block-banner-caption</code> and then add a <code>&lt;div&gt;</code> with a link to the photo source.</p>
-<p>To activate this partial template, we have to add a field to <code>_quarto.yml</code>:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>_quarto.yml (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">html</span><span class="kw">:</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">template-partials</span><span class="kw">:</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> partials/title-block.html</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<p>We need this addition to the title block to look okay, so we amend <code>title-block.css</code>:</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>title-block.css</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.quarto-title-block</span> <span class="fu">.quarto-title-banner</span> {</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-position-x</span>: <span class="dv">50</span><span class="dt">%</span><span class="op">;</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-position-y</span>: <span class="dv">50</span><span class="dt">%</span><span class="op">;</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-blend-mode</span>: overlay<span class="op">;</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">background-color</span>: <span class="fu">rgba(</span><span class="dv">10</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">.5</span><span class="fu">)</span><span class="op">;</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="fu">rgb(</span><span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="fu">)</span><span class="op">;</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="fu">.quarto-title-block</span> <span class="fu">.quarto-title-banner</span> <span class="fu">.title-block-caption</span> {</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">font-size</span>: <span class="dv">.75</span><span class="dt">em</span><span class="op">;</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="fu">rgba(</span><span class="dv">255</span><span class="op">,</span><span class="dv">255</span><span class="op">,</span><span class="dv">255</span><span class="op">,</span><span class="dv">.7</span><span class="fu">)</span><span class="op">;</span></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="fu">.quarto-title-block</span> <span class="fu">.quarto-title-banner</span> <span class="fu">.title-block-caption</span> a {</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">text-decoration</span>: <span class="dv">underline</span> <span class="at">!important</span><span class="op">;</span></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="fu">rgba(</span><span class="dv">255</span><span class="op">,</span><span class="dv">255</span><span class="op">,</span><span class="dv">255</span><span class="op">,</span><span class="dv">.7</span><span class="fu">)</span><span class="op">;</span></span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<style type="text/css">
-.quarto-title-block .quarto-title-banner {
-  background-position-x: 50%;
-  background-position-y: 50%;
-  background-blend-mode: overlay;
-  background-color: rgba(10, 10, 10, .5);
-  color: rgb(255, 255, 255);
-}
-
-.quarto-title-block .quarto-title-banner .title-block-caption {
-  font-size: .75em;
-  color: rgba(255,255,255,.7);
-}
-
-.quarto-title-block .quarto-title-banner .title-block-caption a {
-  text-decoration: underline !important;
-  color: rgba(255,255,255,.7);
-}
-</style>
-</div>
-<p>At last, we have a decent looking title banner with a background image and a photo credit.</p>
-<div class="column-body-outset">
-<p><img src="quarto-post-header-fixed.png" class="img-fluid" alt="A header on the default Quarto site. We can see the word 'neon' and a link to the source of the photo."></p>
-</div>
-</section><section id="other-notes" class="level2"><h2 class="anchored" data-anchor-id="other-notes">other notes</h2>
-<section id="homepage-listings" class="level3"><h3 class="anchored" data-anchor-id="homepage-listings">homepage / listings</h3>
-<p>tktktk</p>
-</section><section id="downlit-links" class="level3"><h3 class="anchored" data-anchor-id="downlit-links">downlit links</h3>
-<p>My favorite feature of the quarto style is the downlit links, where I R code is automatically linked to documentation. This piece of code <code><a href="https://rdrr.io/r/stats/lm.html">stats::lm()</a></code> is linked, and I didn’t have to do anything! In my old blog, I would replicate this style by manually adding links or using <code><a href="https://downlit.r-lib.org/reference/autolink.html">downlit::autolink()</a></code> to create links for me. But the links added by downlit and those done by hand have a differently style in the rendered document:</p>
-<ul>
-<li>
-<code><a href="https://rdrr.io/r/stats/lm.html">stats::lm()</a></code> linked by downlit</li>
-<li>
-<a href="https://rdrr.io/r/stats/lm.html"><code>stats::lm()</code></a> linked manually</li>
-</ul>
-<p>This link inconsistency is annoying, so it became one of my automatic checks.</p>
-<p>When I was working on this post, I couldn’t get the above demonstration to work. downlit appeared not to process the file <em>unless</em> the file had an explicit R code block in it which was mystifying!</p>
-<p>By default, the downlit links are not underlined, so I created a file called <code>downlit-underline.css</code> and added it to <code>_quarto.yml</code>. This css is something I had copy-pasted for use in my rmarkdown notebooks, and I have forgetten where I originally found it. I have included it as a comment.</p>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>downlit-underline.css</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode css code-with-copy"><code class="sourceCode css"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>code a<span class="in">:any-link</span> {</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">color</span>: <span class="bu">inherit</span><span class="op">;</span> <span class="co">/* use colour from syntax highlighting */</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">text-decoration</span>: <span class="dv">underline</span><span class="op">;</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">text-decoration-color</span>: <span class="cn">#ccc</span><span class="op">;</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<style type="text/css">
-code a:any-link {
-  color: inherit; /* use colour from syntax highlighting */
-  text-decoration: underline;
-  text-decoration-color: #ccc;
-}
-</style>
-</div>
-<div class="cell">
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>_quarto.yml (key portion)</strong></pre>
-</div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">html</span><span class="kw">:</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">css</span><span class="kw">:</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> downlit-underline.css</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
 <hr>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -612,21 +676,35 @@ Session info
 
 ─ Packages ───────────────────────────────────────────────────────────────────
  package     * version date (UTC) lib source
+ brio          1.1.3   2021-11-30 [1] CRAN (R 4.3.0)
  cli           3.6.1   2023-03-23 [1] CRAN (R 4.3.0)
+ curl          5.0.1   2023-06-07 [1] CRAN (R 4.3.0)
  digest        0.6.33  2023-07-07 [1] CRAN (R 4.3.1)
  evaluate      0.21    2023-05-05 [1] CRAN (R 4.3.0)
+ fansi         1.0.4   2023-01-22 [1] CRAN (R 4.3.0)
  fastmap       1.1.1   2023-02-24 [1] CRAN (R 4.3.0)
+ fs            1.6.3   2023-07-20 [1] CRAN (R 4.3.1)
+ glue          1.6.2   2022-02-24 [1] CRAN (R 4.3.0)
  htmltools     0.5.5   2023-03-23 [1] CRAN (R 4.3.0)
  htmlwidgets   1.6.2   2023-03-17 [1] CRAN (R 4.3.0)
  jsonlite      1.8.7   2023-06-29 [1] CRAN (R 4.3.1)
  knitr         1.43    2023-05-25 [1] CRAN (R 4.3.0)
+ lifecycle     1.0.3   2022-10-07 [1] CRAN (R 4.3.0)
+ magrittr      2.0.3   2022-03-30 [1] CRAN (R 4.3.0)
+ pillar        1.9.0   2023-03-22 [1] CRAN (R 4.3.0)
+ pkgconfig     2.0.3   2019-09-22 [1] CRAN (R 4.3.0)
  ragg          1.2.5   2023-01-12 [1] CRAN (R 4.3.0)
  rlang         1.1.1   2023-04-28 [1] CRAN (R 4.3.0)
  rmarkdown     2.23    2023-07-01 [1] CRAN (R 4.3.0)
  rstudioapi    0.15.0  2023-07-07 [1] CRAN (R 4.3.1)
  sessioninfo   1.2.2   2021-12-06 [1] CRAN (R 4.3.0)
+ stringi       1.7.12  2023-01-11 [1] CRAN (R 4.3.0)
+ stringr       1.5.0   2022-12-02 [1] CRAN (R 4.3.0)
  systemfonts   1.0.4   2022-02-11 [1] CRAN (R 4.3.0)
  textshaping   0.3.6   2021-10-13 [1] CRAN (R 4.3.0)
+ tibble        3.2.1   2023-03-20 [1] CRAN (R 4.3.0)
+ utf8          1.2.3   2023-01-31 [1] CRAN (R 4.3.0)
+ vctrs         0.6.3   2023-06-14 [1] CRAN (R 4.3.1)
  xfun          0.39    2023-04-20 [1] CRAN (R 4.3.0)
  yaml          2.3.7   2023-01-23 [1] CRAN (R 4.3.0)
 
@@ -639,7 +717,7 @@ Session info
 </div>
 
 
-</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");

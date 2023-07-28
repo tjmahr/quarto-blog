@@ -334,11 +334,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co">#&gt; - For execution on a local, multicore CPU with excess RAM we recommend calling</span></span>
 <span><span class="co">#&gt;   options(mc.cores = parallel::detectCores())</span></span>
 <span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rstanarm/man/stan_glm.html">stan_glm</a></span><span class="op">(</span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/stan_glm.html">stan_glm</a></span><span class="op">(</span></span>
 <span>  <span class="va">Petal.Width</span> <span class="op">~</span> <span class="va">Petal.Length</span> <span class="op">*</span> <span class="va">Species</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">iris</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html">gaussian</a></span><span class="op">(</span><span class="op">)</span>, </span>
-<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/rstanarm/man/priors.html">normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://mc-stan.org/rstanarm/reference/priors.html">normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="st">"20230718"</span></span>
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>

@@ -6,56 +6,13 @@ date-modified: "`r format(Sys.Date())`"
 categories: [meta, dev]
 ---
 
-This is the **not** first post in a Quarto blog. Welcome!
+This post is a set of notes on how I migrated my blog from Jekyll (a
+Ruby based blogging system) to Quarto (a Pandoc/RMarkdown-ish based
+blogging system).
 
 ![](thumbnail.jpg)
 
-- [x] I want a banner image on top like the old site with a credit to
-  the source.
 
-- [x] I had to put `fig-width: 8` under `format > html` in
-  `_quarto.yml`. I also pushed other knitr options here: 
-
-```
-    fig-asp: 0.618
-    fig-dpi: 300
-    fig-align: "center"
-    fig-cap-location: "margin"
-```
-
-- [ ] I am not sure how to replicate the `out.width` knitr option.
-- [ ] I want to use targets instead of freeze.
-- [x] I need old URLs to redirect. Use `aliases: [""]` in header.
-
-I got to opt into `fig-cap-location: "margin"`.
-
-I had to remove the old knitr _cached stuff. Still need a different solution.
-
-I don't want the green links. If I set the link color, that still leaves the green 
-link color in the table of contents.
-
-
-- [x] I want a slightly larger font size. Set `fontsize: 1.1em` in
-  \_quarto.yml
-
-- [x] All of my old manual downlit attempts are styled differently than
-  actual downlit urls. Added a check.
-
-- [x] I want underlined downlit links. Done by adding a new css file.
-
-I have to convert fig.alt and fig.cap to here.
-
-```
-#| fig-alt: "Examples of `plot_dist()`"
-#| fig-cap:
-```
-
-
-It's configuration. Lots of configuration.
-
-- project level
-- directory level
-- post-level yaml
 
 ## big ideas first
 
@@ -71,6 +28,8 @@ workaround. I sometimes used Jekyll-specific syntax and site-specific
 theming---a no-go in Quarto-land---and I have to port them over now too.
 **All of these features and customizations become potential liabilities
 at migration time.** 
+
+## why make the switch
 
 
 
@@ -90,21 +49,21 @@ My Jekyll blog had the following, very simplified, high-level structure.
 .
 ├── 📁 _R 
 │   ├── 📁 _drafts
-│   ├── 📄 2023-07-03-bayesian-ordering-constraint.Rmd
+│   ├── 📄 2022-03-10-self-titled-ggplot2-plots.Rmd
 │   └── [other .Rmd files]
 ├── 📁 _posts
-│   ├── 📄 2023-07-03-bayesian-ordering-constraint.md
+│   ├── 📄 2022-03-10-self-titled-ggplot2-plots.md
 │   └── [other .md files]
 ├── 📁 _drafts
 ├── 📁 _site
-│   ├── 📁 bayesian-ordering-constraint
+│   ├── 📁 self-titled-ggplot2-plots
 │   │   └── 📄 index.html
 │   ├── [other directories for each post]
 |   └── 📄 index.html
 └── 📁 assets
 |   ├── 📁 css
 |   ├── 📁 images
-|   |   ├── 🌅 2023-07-ruins-1280.jpg
+|   |   ├── 🌅 2022-03-neon.jpg
 |   |   └── [other images for each post]
 |   └── 📁 js
 └── 📄 _targets.R
@@ -133,15 +92,15 @@ Here is the parallel set up in my Quarto site:
 ```
 .
 ├── 📁 posts 
-│   ├── 📁 2023-07-03-bayesian-ordering-constraint
-│   |   ├── 🌅 2023-07-ruins-1280.jpg
+│   ├── 📁 2022-03-10-self-titled-ggplot2-plots
+│   |   ├── 🌅 2022-03-neon.jpg
 │   |   └── 📄 index.qmd
 │   ├── [other directories for each post]
 │   └── 📄 _metadata.yml
 ├── 📁 docs
 │   ├── 📁 posts
-|   │   ├── 📁 2023-07-03-bayesian-ordering-constraint
-|   │   |   ├── 🌅 2023-07-ruins-1280.jpg
+|   │   ├── 📁 2022-03-10-self-titled-ggplot2-plots
+|   │   |   ├── 🌅 2022-03-neon.jpg
 |   │   |   └── 📄 index.html
 |   |   └── [other directories for each post]
 │   └── 📄 index.html
@@ -167,9 +126,9 @@ published. In order to set the date for a post, I have to set `date:
 ### broken URLs and redirects
 
 The addresses created by Jekyll did not include the date:
-`bayesian-ordering-constraint/index.html`. But in Quarto, the folder
+`self-titled-ggplot2-plots/index.html`. But in Quarto, the folder
 name carries over to the site:
-`posts/2023-07-03-bayesian-ordering-constraint/index.html`. I am not
+`posts/2022-03-10-self-titled-ggplot2-plots/index.html`. I am not
 sure how to get Quarto to automatically change output folder names, and
 this sucks because any pre-existing links to my posts now point to
 broken URLS. 
@@ -180,11 +139,11 @@ alias for the post:
 ```{yaml}
 #| filename: "Quarto index.qmd front matter (key portion)"
 aliases:
-  - "/bayesian-ordering-constraint/"
+  - "/self-titled-ggplot2-plots/"
 ```
 
 Quarto will create a simple page at
-`/bayesian-ordering-constraint/index.html` that will redirect to the
+`/self-titled-ggplot2-plots/index.html` that will redirect to the
 proper URL. 
 
 
@@ -198,10 +157,55 @@ To migrate a single post, we need to do the following steps:
     `posts/[post-date-and-filename]` and update the locations in the
     .qmd file accordingly.
 3. Migrate YAML metadata.
+4. Replace Jekyll-specific syntax and theming with Quarto versions.
+
+For things like steps 1--3, I was able to write R functions to handle this 
+migration. For things like 4, I wrote an R function to run a series of checks
+on a file for potential issues.
+
+Here is an example of the functions running on two posts.
+
+```{r}
+source("import-posts.R")
+base_url <- "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/20e6ab146716425f485ca4f0c81f18aaccebb10f" 
+post_dir <- "_demo/posts"
+
+data_post <- import_jekyll_post(
+  target_post = "_R/2022-03-10-self-titled-ggplot2-plots.Rmd", 
+  base_url = base_url, 
+  post_dir = post_dir
+)
+
+data_post$lines_current |> 
+  check_post()
+
+data_post <- import_jekyll_post(
+  target_post = "_R/2023-07-03-bayesian-ordering-constraint.Rmd", 
+  base_url = base_url, 
+  post_dir = post_dir
+)
+
+data_post$lines_current |> 
+  check_post()
+```
+
+```{r, include = FALSE}
+fs::dir_delete("_demo/posts/2022-03-10-self-titled-ggplot2-plots/")
+fs::dir_delete("_demo/posts/2023-07-03-bayesian-ordering-constraint/")
+```
+
+The `check_post()` function runs over a file and looks for the lines of 
+text with the following issues:
+
+  - references to `assets/`
+  - Jekyll syntax
+  - manually linked code (which should be handled by downlit)
+  - emoji workarounds (use native emoji)
+
+## specific migration problems
 
 
-
-## post footers
+### post footers
 
 At the end of each post on the Jekyll site, I included a footer with 
 
@@ -262,8 +266,7 @@ nice for things like datasets or image assets---so to go up to the
 parent directory for `_footer.Rmd`, we use `../`.
 
 
-
-## post headers
+### post headers
 
 On the Jekyll site, I could include a banner image, a caption for the
 banner image, and a color overlay for the image using YAML metadata:
@@ -455,7 +458,7 @@ tktktk
 
 ### downlit links
 
-My favorite feature of the quarto style is the downlit links, where I R
+My favorite feature of the Quarto style is the downlit links, where R
 code is automatically linked to documentation. This piece of code
 `stats::lm()` is linked, and I didn't have to do anything! In my old
 blog, I would replicate this style by manually adding links or using
@@ -498,8 +501,57 @@ format:
 
 
 
+## scratch
 
 
+- [x] I want a banner image on top like the old site with a credit to
+  the source.
+
+- [x] I had to put `fig-width: 8` under `format > html` in
+  `_quarto.yml`. I also pushed other knitr options here: 
+
+```
+    fig-asp: 0.618
+    fig-dpi: 300
+    fig-align: "center"
+    fig-cap-location: "margin"
+```
+
+- [ ] I am not sure how to replicate the `out.width` knitr option.
+- [ ] I want to use targets instead of freeze.
+- [x] I need old URLs to redirect. Use `aliases: [""]` in header.
+
+I got to opt into `fig-cap-location: "margin"`.
+
+I had to remove the old knitr _cached stuff. Still need a different solution.
+
+I don't want the green links. If I set the link color, that still leaves the green 
+link color in the table of contents.
+
+
+- [x] I want a slightly larger font size. Set `fontsize: 1.1em` in
+  \_quarto.yml
+
+- [x] All of my old manual downlit attempts are styled differently than
+  actual downlit urls. Added a check.
+
+- [x] I want underlined downlit links. Done by adding a new css file.
+
+I have to convert fig.alt and fig.cap to here.
+
+```
+#| fig-alt: "Examples of `plot_dist()`"
+#| fig-cap:
+```
+
+
+
+This is the **not** first post in a Quarto blog. Welcome!
+It's configuration. Lots of configuration.
+
+- project level
+- directory level
+- post-level yaml
 
 
 {{< include ../_footer.Rmd >}}
