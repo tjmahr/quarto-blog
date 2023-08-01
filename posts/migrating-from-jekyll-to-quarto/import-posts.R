@@ -49,9 +49,6 @@ import_jekyll_post <- function(target_post, base_url, post_dir = "posts", overwr
   } else {
     brio::write_lines(data_file$lines_migrated, data_file$path_post)
     cli::cli_alert_success("Post file created {.path {data_file$path_post}}")
-  }
-
-  if (overwrite) {
     knitr::convert_chunk_header(
       input = data_file$path_post,
       output = identity,
@@ -62,7 +59,6 @@ import_jekyll_post <- function(target_post, base_url, post_dir = "posts", overwr
       "Converted in-header chunk options to in-body options"
     )
   }
-
 
   data_file$lines_current <- brio::read_lines(data_file$path_post)
   invisible(data_file)
@@ -284,15 +280,20 @@ scratch <- function() {
       fs::dir_ls(regexp = "\\d{4}") |>
       basename()
 
-    urls <- file.path("https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R", slugs)
+    # urls <- file.path("https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/_R", slugs)
+
+    targets <- file.path("_R", slugs)
 
 
+    target <- sample(targets, size = 1)
+    target <- targets[34]
 
-    url_raw <- sample(urls, size = 1)
-    url_raw <- urls[34]
 
-
-    d <- import_jekyll_post(url_raw)
+    d <- import_jekyll_post(
+      target_post = target,
+      base_url = "https://raw.githubusercontent.com/tjmahr/tjmahr.github.io/master/",
+      overwrite = FALSE
+    )
     check_post(d$lines_current)
 
 
@@ -317,7 +318,7 @@ scratch <- function() {
 
 
 
-    d <- import_jekyll_post(url_raw)
+    d <- import_jekyll_post(url_raw, )
     check_post(d$lines_current)
     # usethis::edit_file(d$path_post)
 
