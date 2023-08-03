@@ -286,7 +286,7 @@ scratch <- function() {
 
 
     target <- sample(targets, size = 1)
-    target <- targets[34]
+    # target <- targets[34]
 
 
     d <- import_jekyll_post(
