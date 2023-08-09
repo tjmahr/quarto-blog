@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="TJ Mahr">
+<meta name="dcterms.date" content="2021-07-07">
+<meta name="description" content="A simulation study of the mighty Slay the Spire relic">
+<title>my experimental quarto blog - Snecko eye lets you play more cards</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script><style>
+
+      .quarto-title-block .quarto-title-banner {
+        background-image: url(2021-07-ss-bg.jpg);
+background-size: cover;
+      }
+</style>
+<link rel="stylesheet" href="../../downlit-underline.css">
+<link rel="stylesheet" href="../../title-block.css">
+</head>
+<body class="floating nav-fixed slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="navbar navbar-expand-lg navbar-dark "><div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">my experimental quarto blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+<li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+<div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full"><div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Snecko eye lets you play more cards</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source" data-quarto-source-url="https://github.com/tjmahr/quarto-blog/blob/main/posts/2021-07-07-slay-the-spire-snecko-eye-simulation/index.qmd"><i class="bi"></i> Code</button></div></div>
+                  <div>
+        <div class="description">
+          A simulation study of the mighty <em>Slay the Spire</em> relic
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">r</div>
+                <div class="quarto-category">simulations</div>
+              </div>
+                  </div>
+          </div>
+
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>TJ Mahr </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 7, 2021</p>
+      </div>
+    </div>
+    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">August 3, 2023</p>
+      </div>
+    </div>
+      
+    </div>
+    
+
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto"><nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
+   
+  <ul>
+<li><a href="#a-baseline-deck" id="toc-a-baseline-deck" class="nav-link active" data-scroll-target="#a-baseline-deck">A baseline deck</a></li>
+  <li>
+<a href="#enter-the-snecko" id="toc-enter-the-snecko" class="nav-link" data-scroll-target="#enter-the-snecko">Enter the Snecko</a>
+  <ul class="collapse">
+<li><a href="#where-does-this-power-come-from" id="toc-where-does-this-power-come-from" class="nav-link" data-scroll-target="#where-does-this-power-come-from">Where does this power come from?</a></li>
+  <li><a href="#the-advantage-at-higher-energy" id="toc-the-advantage-at-higher-energy" class="nav-link" data-scroll-target="#the-advantage-at-higher-energy">The advantage at higher energy</a></li>
+  <li><a href="#you-should-probably-play-snecko" id="toc-you-should-probably-play-snecko" class="nav-link" data-scroll-target="#you-should-probably-play-snecko">You should probably play Snecko</a></li>
+  </ul>
+</li>
+  </ul></nav>
+</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content"><p>In <a href="../../pokemon-go-unown-simulation">a previous post</a>, I used simulations to estimate how long it would take to collect the unique Unowns in <em>Pokemon Go!</em> The message of the post was that we can use simulations to solve problems when the analytic solution is not clear or obvious. The current post is an another example of using simulations to understand a weird counting/probability problem.</p>
+<hr>
+<p>Over the past strange year, I sunk a lot of time into <a href="https://www.megacrit.com/" title="Slay the Spire website"><em>Slay the Spire</em></a>, a <a href="https://en.wikipedia.org/wiki/Roguelike" title="Roguelike on Wikipedia">rogue-like</a> deck-building game. You have to escape from a 50-floor spire, fighting monsters by playing cards. The cards let you attack, defend, apply buffs and debuffs, draw cards, etc. You start each turn with a given amount of energy, the cards cost energy (with more powerful effects costing more energy), so you need to plan out how to play your turns in order to defeat the monsters. You receive more cards from winning battles and can receive special relics that will make you stronger or change how your deck plays.</p>
+<p>That’s the basic gist of the game. The sublime part comes when the cards and relics start synergistically empowering each other and comboing off each other. You might get the curse <a href="https://slay-the-spire.fandom.com/wiki/Pain" title="Pain on the Slay the Spire Fandom wiki">Pain</a> which drains you of 1 health every time you play a card. (This is bad.) But then you find a <a href="https://slay-the-spire.fandom.com/wiki/Rupture" title="Rupture on the Slay the Spire Fandom wiki">Rupture</a> which increases your strength every time you take damage from a card. Then you get <a href="https://slay-the-spire.fandom.com/wiki/Runic_Cube" title="Runic Cube on the Slay the Spire Fandom wiki">Runic Cube</a> which draws you an extra card every time you take damage. Finally, you find <a href="https://slay-the-spire.fandom.com/wiki/Reaper" title="Reaper on the Slay the Spire Fandom wiki">Reaper</a> which converts damage into health. So you now have this card-drawing, strength-building, self-sustaining engine that makes you unstoppable. (This <a href="https://youtu.be/OySMKDSWsTE">particular scenario</a> unfolded in a recent game by the streamer Jorbs.)</p>
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="2021-07-ss.jpg" class="img-fluid figure-img" alt="A screenshot of Slay The Spire gameplay."></p>
+<figcaption class="figure-caption margin-caption">Screenshot of <em>Slay the Spire</em> gameplay. We see a hand of 5 cards at the bottom with 1/3 energy available on the left.</figcaption></figure>
+</div>
+<p>The exercise today: <strong>simulate the maximum number of cards we can play per turn</strong> for 3 energy under normal circumstances and when a game-warping relic (Snecko Eye) is active.</p>
+<section id="a-baseline-deck" class="level2"><h2 class="anchored" data-anchor-id="a-baseline-deck">A baseline deck</h2>
+<p>Let’s consider a setup as a baseline for comparison.</p>
+<ul>
+<li>We have 3 energy to play cards per turn.</li>
+<li>We draw 5 cards per turn.</li>
+<li>Our deck has 16 cards: 1 card costs 0 energy, 12 cost 1 energy, 3 cost 2 energy, and 1 costs 3 energy.</li>
+</ul>
+<p>(I made up this deck for this example.)</p>
+<p>If we build our deck, we can find the average cost of our cards and simulate some draws by <code><a href="https://rdrr.io/r/base/sample.html">sample()</a></code>-ing without replacement.</p>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org">magrittr</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20210707</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">costs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">12</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="va">costs</span></span>
+<span><span class="co">#&gt;  [1] 0 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 3</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">costs</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1.235294</span></span>
+<span></span>
+<span><span class="co"># Simulate 3 hands</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">costs</span>, size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1 2 2 1 1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">costs</span>, size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1 3 2 1 1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">costs</span>, size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1 1 1 1 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Suppose that we don’t really care about what the cards do. We want to maximize the number of cards that we play per turn. We just want to know: <strong>How many cards per turn can I expect to play on average?</strong></p>
+<p>Let’s write a function that counts the number of playable cards in a hand given a certain energy budget. The basic logic is that we sort the card costs, compute the cumulative sum (cumulative energy spent on each card), and count how many sums (played cards) are less than or equal to the energy limit.</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># A worked example</span></span>
+<span><span class="va">energy</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
+<span><span class="va">hand</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">costs</span>, size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">hand</span></span>
+<span><span class="co">#&gt; [1] 3 1 0 1 1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">hand</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0 1 1 1 3</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">hand</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0 1 2 3 6</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">hand</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="va">energy</span> </span>
+<span><span class="co">#&gt; [1]  TRUE  TRUE  TRUE  TRUE FALSE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">hand</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="va">energy</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4</span></span>
+<span></span>
+<span><span class="va">count_max_playable</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">hand</span>, <span class="va">energy</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span><span class="op">(</span><span class="va">hand</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="va">energy</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">count_max_playable</span><span class="op">(</span><span class="va">hand</span>, <span class="va">energy</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we can do this procedure on several thousand hands and run summary statistics on the number of playable cards in each hand.</p>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">simulated_cards_played</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span><span class="op">(</span></span>
+<span>  <span class="fl">10000</span>,</span>
+<span>  <span class="va">costs</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>    <span class="fu">count_max_playable</span><span class="op">(</span>energy <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">simulated_cards_played</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">#&gt;   2.000   3.000   3.000   3.173   3.000   4.000</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">simulated_cards_played</span><span class="op">)</span></span>
+<span><span class="co">#&gt; simulated_cards_played</span></span>
+<span><span class="co">#&gt;    2    3    4 </span></span>
+<span><span class="co">#&gt;  451 7364 2185</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/proportions.html">proportions</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">simulated_cards_played</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; simulated_cards_played</span></span>
+<span><span class="co">#&gt;      2      3      4 </span></span>
+<span><span class="co">#&gt; 0.0451 0.7364 0.2185</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+
+</div>
+<p>The expected number of playable cards per hand is 3.2. The dreaded (1, 2, 2, 2, 3) hand appears about 4.5% of the time, but the one 0-cost card in our deck lets us play a fourth card about 21.8% of the time.</p>
+</section><section id="enter-the-snecko" class="level2 page-columns page-full"><h2 class="anchored" data-anchor-id="enter-the-snecko">Enter the Snecko</h2>
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="2021-07-snecko.png" class="img-fluid figure-img" alt="A screenshot of Snecko Eye."></p>
+<figcaption class="figure-caption margin-caption">Snecko Eye is probably the best relic in the game.</figcaption></figure>
+</div>
+<p>Let’s suppose we obtain the mighty <a href="https://slay-the-spire.fandom.com/wiki/Snecko_Eye" title="Snecko Eye on the Slay the Spire Fandom wiki">Snecko Eye</a> relic. It says “Draw 2 additional cards each turn. Start each combat Confused.” Confused is a debuff that randomizes the costs of cards when we draw them. So now our setup is the following:</p>
+<ul>
+<li>We have 3 energy to play cards per turn.</li>
+<li>We draw 7 cards per turn.</li>
+<li>Our deck has 16 cards: the costs are random integers between 0 and 3 energy.</li>
+</ul>
+<p>The average energy cost of any given card in our deck is now <code>mean(0:3)</code>&nbsp;= 1.5. In the baseline example, the average energy cost was 1.24. (One obvious strategy with Snecko Eye is to maximize the costs of new cards—that is, try to get as many as 2s and 3s as possible because the new expected cost is less than the original cost. But let’s ignore that dimension of gameplay for now.)</p>
+<p>So here’s the puzzle, <strong>how many cards per turn can I play with Snecko Eye?</strong> We can run the same simulations as above.</p>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">snecko_costs</span> <span class="op">&lt;-</span> <span class="fl">0</span><span class="op">:</span><span class="fl">3</span> </span>
+<span><span class="va">simulated_snecko_cards_played</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span><span class="op">(</span></span>
+<span>  <span class="fl">10000</span>,</span>
+<span>  <span class="va">snecko_costs</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">7</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>    <span class="fu">count_max_playable</span><span class="op">(</span>energy <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">simulated_snecko_cards_played</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">#&gt;   1.000   3.000   4.000   3.826   5.000   7.000</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">simulated_snecko_cards_played</span><span class="op">)</span></span>
+<span><span class="co">#&gt; simulated_snecko_cards_played</span></span>
+<span><span class="co">#&gt;    1    2    3    4    5    6    7 </span></span>
+<span><span class="co">#&gt;   83  979 2911 3397 1945  621   64</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/proportions.html">proportions</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">simulated_snecko_cards_played</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; simulated_snecko_cards_played</span></span>
+<span><span class="co">#&gt;      1      2      3      4      5      6      7 </span></span>
+<span><span class="co">#&gt; 0.0083 0.0979 0.2911 0.3397 0.1945 0.0621 0.0064</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+
+</div>
+<p>Let us note that the dream—playing 7 cards in one turn—happened about 0.6% of the time and the nightmare—drawing only 2-cost and 3-cost cards—happened 0.8% of the time. Recall that in the baseline setup, we got to play 4 cards 21.8% of the time. With Snecko Eye, we can play 4 or more cards per turn 60.3% of the time. Snecko Eye simply lets us play more cards on average.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Yes, we could skip the random sampling
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For this problem where there are 4^7&nbsp;= 16384 combinations, a brute-force enumeration is possible. The proportions from the counting from the full set are within .005 (half a percentage point) of the proportions from simulating 10,000 hands.</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Generate all combinations</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html">expand.grid</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="co"># Count playables in each row</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span>MARGIN <span class="op">=</span> <span class="fl">1</span>, <span class="va">count_max_playable</span>, energy <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/proportions.html">proportions</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; .</span></span>
+<span><span class="co">#&gt;     1     2     3     4     5     6     7 </span></span>
+<span><span class="co">#&gt; 0.008 0.098 0.287 0.341 0.200 0.059 0.007</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<section id="where-does-this-power-come-from" class="level3 page-columns page-full"><h3 class="anchored" data-anchor-id="where-does-this-power-come-from">Where does this power come from?</h3>
+<p>Is the magic of Snecko Eye the card draw or the cost randomization? Well, let’s suppose that we are just confused and we draw only 5 cards (as in the baseline example).</p>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">simulated_confused_cards_played</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span><span class="op">(</span></span>
+<span>  <span class="fl">10000</span>,</span>
+<span>  <span class="va">snecko_costs</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">5</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>    <span class="fu">count_max_playable</span><span class="op">(</span>energy <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">simulated_confused_cards_played</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
+<span><span class="co">#&gt;    1.00    2.00    3.00    3.03    4.00    5.00</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">simulated_confused_cards_played</span><span class="op">)</span></span>
+<span><span class="co">#&gt; simulated_confused_cards_played</span></span>
+<span><span class="co">#&gt;    1    2    3    4    5 </span></span>
+<span><span class="co">#&gt;  358 2496 4162 2454  530</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/proportions.html">proportions</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">simulated_confused_cards_played</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; simulated_confused_cards_played</span></span>
+<span><span class="co">#&gt;      1      2      3      4      5 </span></span>
+<span><span class="co">#&gt; 0.0358 0.2496 0.4162 0.2454 0.0530</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+
+</div>
+<p>Here the average number of cards played is 3.0 and we play 4–5 cards per turn 29.8% of the time. This percentage is greater than the baseline case (21.8%), but the nightmare case is worse (1 card), occurring 3.6% of the time.</p>
+<p>We can plot the three simulations side by side and observe the distributions. First, we package them together into a single dataframe suitable for plotting and plot a bar chart.</p>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sim1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  set <span class="op">=</span> <span class="st">"Baseline"</span>,</span>
+<span>  energy <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  cards <span class="op">=</span> <span class="va">simulated_cards_played</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sim2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  set <span class="op">=</span> <span class="st">"Snecko Eye"</span>,</span>
+<span>  energy <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  cards <span class="op">=</span> <span class="va">simulated_snecko_cards_played</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sim3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  set <span class="op">=</span> <span class="st">"Confused"</span>,</span>
+<span>  energy <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  cards <span class="op">=</span> <span class="va">simulated_confused_cards_played</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">sim1</span>, <span class="va">sim2</span>, <span class="va">sim3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">sims</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cards</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_bar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html">stat</a></span><span class="op">(</span><span class="va">prop</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html">facet_wrap</a></span><span class="op">(</span><span class="st">"set"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">7</span>, minor_breaks <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">label_percent</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Confusion increases variance. Card draw increases mean."</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"Number of playable of cards in hand"</span>, </span>
+<span>    y <span class="op">=</span> <span class="st">"Percentage of hands"</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"N = 10,000 simulations per panel"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_grey</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: `stat(prop)` was deprecated in ggplot2 3.4.0.</span></span>
+<span><span class="co">#&gt; ℹ Please use `after_stat(prop)` instead.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/bar-by-three-1.png" class="img-fluid" style="width:100.0%" alt="A one by three plot showing a histogram of playable cards for each simulation set. It's title says 'Confusion increases variance. Card draw increases mean.'"></p>
+</div>
+</div>
+<p>Both the confused and the Snecko Eye panels have increased variance. The bars are shorter and more spread out, compared to the Baseline panel. The peak (the mode) shifts from 3 to 4 cards from the Confused and Snecko Eye panels.</p>
+<p>A more statistically niche technique would be plotting the <a href="https://en.wikipedia.org/wiki/Empirical_distribution_function" title="Empirical distribution function on Wikipedia">empirical cumulative distribution function</a>. Imagine taking the bars from the previous plot and summing them along the <em>x</em> axis so that they are cumulative percentages. These percentages would tell you about the percentage of cases less than or equal to that given value. In the plot below, I do that procedure on reversed <em>x</em> axis, so we can look at what proportion of simulations had at least 4 cards played. (I chose the reversed <em>x</em> axis to visually convey the advantage of Snecko Eye.)</p>
+<div class="cell page-columns page-full" data-fig.asp="NA">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">props</span> <span class="op">&lt;-</span> <span class="va">sims</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">count</a></span><span class="op">(</span><span class="va">set</span>, <span class="va">cards</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="co"># Fill in rows that would be n = 0</span></span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/complete.html">complete</a></span><span class="op">(</span><span class="va">set</span>, cards <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">7</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="co"># Compute ECDF in reverse order (dtarting at 7 cards)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">set</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">cards</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">set</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>    proportion <span class="op">=</span> <span class="va">n</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span>,</span>
+<span>    ecdf <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html">cumsum</a></span><span class="op">(</span><span class="va">proportion</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">ungroup</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">props</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cards</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_step</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">ecdf</span> , color <span class="op">=</span> <span class="va">set</span>, linetype <span class="op">=</span> <span class="va">set</span><span class="op">)</span>, </span>
+<span>    direction <span class="op">=</span> <span class="st">"mid"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html">geom_label</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">set</span>, y <span class="op">=</span> <span class="va">ecdf</span><span class="op">)</span>,</span>
+<span>    label <span class="op">=</span> <span class="st">"Snecko can play 4 or more\ncards in 60% of hands"</span>,</span>
+<span>    data <span class="op">=</span> <span class="va">.</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">set</span> <span class="op">==</span> <span class="st">"Snecko Eye"</span>, <span class="va">cards</span> <span class="op">==</span> <span class="fl">4</span><span class="op">)</span>, </span>
+<span>    y <span class="op">=</span> <span class="fl">.65</span>,</span>
+<span>    nudge_x <span class="op">=</span> <span class="op">-</span><span class="fl">.25</span>,</span>
+<span>    hjust <span class="op">=</span> <span class="fl">1.0</span>,</span>
+<span>    vjust <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>    fill <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/alpha.html">alpha</a></span><span class="op">(</span><span class="st">"grey93"</span>, <span class="fl">.6</span><span class="op">)</span>,</span>
+<span>    label.size <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>    show.legend <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    size <span class="op">=</span> <span class="fl">4.5</span>,</span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_reverse</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">7</span><span class="op">:</span><span class="fl">0</span>, minor_breaks <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">label_percent</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"At least X playable cards in hand"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Percentage of hands"</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"N = 10,000 simulations per line"</span>,</span>
+<span>    color <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    linetype <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_grey</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span></span>
+<span>    legend.position <span class="op">=</span> <span class="st">"top"</span>, </span>
+<span>    legend.justification <span class="op">=</span> <span class="st">"left"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display page-columns page-full">
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="index_files/figure-html/ecdf-1.png" class="img-fluid figure-img" style="width:80.0%" alt="A plot of the ECDF for the proportion of hands with at least x playable cards. Snecko dominates the other lines in the plot because we can play more cards per turn with it. There is a caption at the center of the plot that says 'Snecko can play 4 or more cards in 60% of hands'. "></p>
+<figcaption class="figure-caption margin-caption">A plot of the ECDF for the proportion of hands with at least x playable cards. Snecko dominates the other lines in the plot because we can play more cards per turn with it.</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="the-advantage-at-higher-energy" class="level3"><h3 class="anchored" data-anchor-id="the-advantage-at-higher-energy">The advantage at higher energy</h3>
+<p>During a run through the game, we can obtain up to two relics (along with Snecko Eye) that increase our energy per turn by 1 unit. Let’s see how these new energy budgets affect the simulations.</p>
+<p>First, we run the simulations. We put the main code into functions so that we can build the dataframes more easily.</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">simulate_decko</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span>, <span class="va">energy</span>, <span class="va">costs</span>, <span class="va">size</span> <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span><span class="op">(</span></span>
+<span>    <span class="va">n</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">costs</span>, size <span class="op">=</span> <span class="va">size</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>      <span class="fu">count_max_playable</span><span class="op">(</span>energy <span class="op">=</span> <span class="va">energy</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">simulate_snecko</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">n</span>, <span class="va">energy</span>, <span class="va">size</span> <span class="op">=</span> <span class="fl">7</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">snecko_costs</span> <span class="op">&lt;-</span> <span class="fl">0</span><span class="op">:</span><span class="fl">3</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">replicate</a></span><span class="op">(</span></span>
+<span>    <span class="va">n</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="va">snecko_costs</span>, size <span class="op">=</span> <span class="va">size</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>      <span class="fu">count_max_playable</span><span class="op">(</span>energy <span class="op">=</span> <span class="va">energy</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">additional_sims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="co"># include old results</span></span>
+<span>  <span class="va">sims</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    set <span class="op">=</span> <span class="st">"Baseline"</span>,</span>
+<span>    energy <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    cards <span class="op">=</span> <span class="fu">simulate_decko</span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">4</span>, <span class="va">costs</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    set <span class="op">=</span> <span class="st">"Baseline"</span>,</span>
+<span>    energy <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    cards <span class="op">=</span> <span class="fu">simulate_decko</span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">5</span>, <span class="va">costs</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    set <span class="op">=</span> <span class="st">"Snecko Eye"</span>,</span>
+<span>    energy <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    cards <span class="op">=</span> <span class="fu">simulate_snecko</span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    set <span class="op">=</span> <span class="st">"Snecko Eye"</span>,</span>
+<span>    energy <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    cards <span class="op">=</span> <span class="fu">simulate_snecko</span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    set <span class="op">=</span> <span class="st">"Confused"</span>,</span>
+<span>    energy <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    cards <span class="op">=</span> <span class="fu">simulate_snecko</span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">4</span>, size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    set <span class="op">=</span> <span class="st">"Confused"</span>,</span>
+<span>    energy <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    cards <span class="op">=</span> <span class="fu">simulate_snecko</span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">5</span>, size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can make the same kind of plot as before. We see that the distribution with the highest mode (the peak that lands on the highest number of cards) in each row is Snecko Eye.</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">additional_sims</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>energy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="va">energy</span>, <span class="st">" energy"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cards</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html">geom_bar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html">stat</a></span><span class="op">(</span><span class="va">prop</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html">facet_grid</a></span><span class="op">(</span><span class="va">energy</span> <span class="op">~</span> <span class="va">set</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">7</span>, minor_breaks <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html">scale_y_continuous</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/label_percent.html">label_percent</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Number of playable of cards in hand"</span>, </span>
+<span>    y <span class="op">=</span> <span class="st">"Percentage of hands"</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"N = 10,000 simulations per panel"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_grey</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/3-by-3-1.png" class="img-fluid" style="width:100.0%" alt="A three by three plot of simulation set by energy cost."></p>
+</div>
+</div>
+<p>One limitation of the other two non-Snecko sets becomes more obvious in the 5-energy row: They can never play 6 or 7 cards in a turn. They don’t draw that many cards. Their distributions are cut off at 5 cards.</p>
+<p>If we look at numerical summaries, we get some sense that the benefit of Snecko diminishes as energy increases but we won’t explore this trend in any detail.</p>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">additional_sims</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">set</span>, <span class="va">energy</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span></span>
+<span>    mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">cards</span><span class="op">)</span>,</span>
+<span>    sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">cards</span><span class="op">)</span>,</span>
+<span>    median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">cards</span><span class="op">)</span>,</span>
+<span>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">mean</span>, <span class="va">sd</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider</a></span><span class="op">(</span></span>
+<span>    names_from <span class="op">=</span> <span class="va">energy</span>, </span>
+<span>    values_from <span class="op">=</span> <span class="va">value</span>, </span>
+<span>    names_prefix <span class="op">=</span> <span class="st">"Energy "</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>Set <span class="op">=</span> <span class="va">set</span>, Statistic <span class="op">=</span> <span class="va">name</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">Statistic</span>, <span class="va">Set</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead><tr class="header">
+<th style="text-align: left;">Set</th>
+<th style="text-align: left;">Statistic</th>
+<th style="text-align: right;">Energy 3</th>
+<th style="text-align: right;">Energy 4</th>
+<th style="text-align: right;">Energy 5</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Baseline</td>
+<td style="text-align: left;">mean</td>
+<td style="text-align: right;">3.17</td>
+<td style="text-align: right;">3.81</td>
+<td style="text-align: right;">4.27</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Confused</td>
+<td style="text-align: left;">mean</td>
+<td style="text-align: right;">3.03</td>
+<td style="text-align: right;">3.44</td>
+<td style="text-align: right;">3.79</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Snecko Eye</td>
+<td style="text-align: left;">mean</td>
+<td style="text-align: right;">3.83</td>
+<td style="text-align: right;">4.30</td>
+<td style="text-align: right;">4.72</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Baseline</td>
+<td style="text-align: left;">median</td>
+<td style="text-align: right;">3.00</td>
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">4.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Confused</td>
+<td style="text-align: left;">median</td>
+<td style="text-align: right;">3.00</td>
+<td style="text-align: right;">3.00</td>
+<td style="text-align: right;">4.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Snecko Eye</td>
+<td style="text-align: left;">median</td>
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">5.00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Baseline</td>
+<td style="text-align: left;">sd</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.53</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Confused</td>
+<td style="text-align: left;">sd</td>
+<td style="text-align: right;">0.92</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">0.84</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Snecko Eye</td>
+<td style="text-align: left;">sd</td>
+<td style="text-align: right;">1.11</td>
+<td style="text-align: right;">1.08</td>
+<td style="text-align: right;">1.06</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section><section id="you-should-probably-play-snecko" class="level3 page-columns page-full"><h3 class="anchored" data-anchor-id="you-should-probably-play-snecko">You should probably play Snecko</h3>
+<div class="quarto-figure quarto-figure-center page-columns page-full">
+<figure class="figure page-columns page-full"><p><img src="2021-07-no-steppo.jpg" class="img-fluid figure-img" alt="Don't tread on me flag with the Snecko Eye flag."></p>
+<figcaption class="figure-caption margin-caption">Pwease no steppo. Posted by <a href="https://www.reddit.com/r/slaythespire/comments/l0qm6z/no_step_on_snecko/?ref=share&amp;ref_source=link">u/usernameequalspants</a>.</figcaption></figure>
+</div>
+<p>We could go on and on with the simulations. Suppose you are dying and you are desperate need of the <a href="https://slay-the-spire.fandom.com/wiki/Apparition" title="Apparition on the Slay the Spire Fandom wiki">Apparition</a> on the top of your deck. How many cards can you play after you are forced to play that card? Or suppose that you are, rightly, playing on Ascension 20 and one of the cards is an unplayable curse. Does that change anything?</p>
+<p>The point here is that we used simulations to visualize how randomization increased the variance of playable cards but the extra cards shifted the mode of the distribution upwards. You can play more cards with Snecko Eye because you simply have more cards you can play per turn.</p>
+<hr>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Session info
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="cell">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.3.0 (2023-04-21 ucrt)
+ os       Windows 11 x64 (build 22621)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  English_United States.utf8
+ ctype    English_United States.utf8
+ tz       America/Chicago
+ date     2023-08-03
+ pandoc   3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   1.3.353
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package     * version date (UTC) lib source
+ cli           3.6.1   2023-03-23 [1] CRAN (R 4.3.0)
+ colorspace    2.1-0   2023-01-23 [1] CRAN (R 4.3.0)
+ digest        0.6.33  2023-07-07 [1] CRAN (R 4.3.1)
+ dplyr       * 1.1.2   2023-04-20 [1] CRAN (R 4.3.0)
+ evaluate      0.21    2023-05-05 [1] CRAN (R 4.3.0)
+ fansi         1.0.4   2023-01-22 [1] CRAN (R 4.3.0)
+ farver        2.1.1   2022-07-06 [1] CRAN (R 4.3.0)
+ fastmap       1.1.1   2023-02-24 [1] CRAN (R 4.3.0)
+ generics      0.1.3   2022-07-05 [1] CRAN (R 4.3.0)
+ ggplot2     * 3.4.2   2023-04-03 [1] CRAN (R 4.3.0)
+ glue          1.6.2   2022-02-24 [1] CRAN (R 4.3.0)
+ gtable        0.3.3   2023-03-21 [1] CRAN (R 4.3.0)
+ htmltools     0.5.5   2023-03-23 [1] CRAN (R 4.3.0)
+ htmlwidgets   1.6.2   2023-03-17 [1] CRAN (R 4.3.0)
+ jsonlite      1.8.7   2023-06-29 [1] CRAN (R 4.3.1)
+ knitr         1.43    2023-05-25 [1] CRAN (R 4.3.0)
+ labeling      0.4.2   2020-10-20 [1] CRAN (R 4.3.0)
+ lifecycle     1.0.3   2022-10-07 [1] CRAN (R 4.3.0)
+ magrittr    * 2.0.3   2022-03-30 [1] CRAN (R 4.3.0)
+ munsell       0.5.0   2018-06-12 [1] CRAN (R 4.3.0)
+ pillar        1.9.0   2023-03-22 [1] CRAN (R 4.3.0)
+ pkgconfig     2.0.3   2019-09-22 [1] CRAN (R 4.3.0)
+ purrr         1.0.1   2023-01-10 [1] CRAN (R 4.3.0)
+ R6            2.5.1   2021-08-19 [1] CRAN (R 4.3.0)
+ ragg          1.2.5   2023-01-12 [1] CRAN (R 4.3.0)
+ rlang         1.1.1   2023-04-28 [1] CRAN (R 4.3.0)
+ rmarkdown     2.23    2023-07-01 [1] CRAN (R 4.3.0)
+ rstudioapi    0.15.0  2023-07-07 [1] CRAN (R 4.3.1)
+ scales        1.2.1   2022-08-20 [1] CRAN (R 4.3.0)
+ sessioninfo   1.2.2   2021-12-06 [1] CRAN (R 4.3.0)
+ systemfonts   1.0.4   2022-02-11 [1] CRAN (R 4.3.0)
+ textshaping   0.3.6   2021-10-13 [1] CRAN (R 4.3.0)
+ tibble        3.2.1   2023-03-20 [1] CRAN (R 4.3.0)
+ tidyr         1.3.0   2023-01-24 [1] CRAN (R 4.3.0)
+ tidyselect    1.2.0   2022-10-10 [1] CRAN (R 4.3.0)
+ utf8          1.2.3   2023-01-31 [1] CRAN (R 4.3.0)
+ vctrs         0.6.3   2023-06-14 [1] CRAN (R 4.3.1)
+ withr         2.5.0   2022-03-03 [1] CRAN (R 4.3.0)
+ xfun          0.39    2023-04-20 [1] CRAN (R 4.3.0)
+ yaml          2.3.7   2023-01-23 [1] CRAN (R 4.3.0)
+
+ [1] C:/Users/Tristan/AppData/Local/R/win-library/4.3
+ [2] C:/Program Files/R/R-4.3.0/library
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</div>
+
+
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
